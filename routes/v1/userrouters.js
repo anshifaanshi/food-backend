@@ -6,7 +6,7 @@ const router=express.Router()
 router.get('/',(req,res)=>{
     res.send("user accessed ")
 })
-router.post('/login',userauth,userlogin);
+router.post('/login',userlogin);
 
 router.post('/logout',userlogout);
 

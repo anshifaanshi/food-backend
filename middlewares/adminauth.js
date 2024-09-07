@@ -12,20 +12,27 @@ const adminauth = (req, res, next) => {
             return res.status(401).json({ success: false, message: "Token missing from Authorization header" });
         }
 
+        // Verify token
         const tokenVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        if (!tokenVerified) {
-            return res.status(401).json({ success: false, message: "User not authorized" });
-        }
 
+        // Check if user is admin
         if (tokenVerified.role !== "admin") {
-            return res.status(401).json({ success: false, message: "User not authorized" });
+            return res.status(403).json({ success: false, message: "User not authorized" });
         }
 
-        req.user = tokenVerified;
-        next();
+        req.user = tokenVerified; // Pass token data to the request object
+        next(); // Continue to the next middleware
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: error.message || "Internal server error" });
+        console.error("Error verifying JWT:", error);
+
+        // Handle specific JWT errors
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ success: false, message: "Token expired" });
+        } else if (error.name === 'JsonWebTokenError') {
+            return res.status(400).json({ success: false, message: "Invalid token" });
+        } else {
+            return res.status(500).json({ success: false, message: "Internal server error" });
+        }
     }
 };
 

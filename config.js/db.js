@@ -6,7 +6,7 @@ const connectdb = async () => {
         console.log("Connected to the database");
     } catch (error) {
         console.log("Database connection error:", error);
-        // You can rethrow the error if you want the caller to handle it
+     
         throw error;
     }
 };

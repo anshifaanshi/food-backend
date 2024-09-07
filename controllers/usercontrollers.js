@@ -9,23 +9,21 @@ const usersignup = async (req, res, next) => {
     try {
         const { name, email, password, phone, profilepic, hotels } = req.body;
 
-        // Check if required fields are provided
         if (!name || !email || !password) {
             return res.status(400).json({ success: false, message: "All fields are required" });
         }
 
-        // Check if the user already exists
+
         const isUserExist = await user.findOne({ email });
         if (isUserExist) {
             return res.status(400).json({ success: false, message: "User already exists" });
         }
 
-        // Hash the password
         const saltRounds = 10;
         const hashedPassword = bcrypt.hashSync(password, saltRounds);
         console.log(hashedPassword);
 
-        // Create the new user
+
         const newUser = await user.create({
             name,
             email,
@@ -36,8 +34,6 @@ const usersignup = async (req, res, next) => {
         const token=generatetoken(newUser._id);
 
         res.cookie('token',token);
-
-        // Send success response
       return  res.status(201).json({ success: true, message: "User created successfully" });
       res.send(newUser);
 
@@ -52,7 +48,7 @@ const usersignup = async (req, res, next) => {
 const userlogin=async(req,res,next)=>{
     try{
         const {password,email}=req.body
-        if(!name||!email ){
+        if(!password||!email ){
             return res.status(400).json({success:false,message:"all fields are required"})
         }
         const userexist=await user.findOne({email})
@@ -67,7 +63,6 @@ const userlogin=async(req,res,next)=>{
 
       res.cookie('token',token);
 
-      // Send success response
     return  res.status(201).json({ success: true, message: "User logged successfully" });
       
     }catch(error){
@@ -92,7 +87,7 @@ const userprofile = async (req, res, next) => {
     try {
         const { id } = req.params;
         console.log(user)
-        const userdata = await user.findOne({ _id: id }); // Use the User model to find the user by ID
+        const userdata = await user.findOne({ _id: id }); 
         if (!userdata) {
             return res.status(404).json({ success: false, message: "User not found" });
         }

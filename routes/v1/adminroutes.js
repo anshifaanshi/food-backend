@@ -9,7 +9,7 @@ router.post("/signup",adminSignup)
 router.post("/login", adminLogin);
 router.post("/logout", adminLogout);
 
-router.get("/profile", adminauth, adminProfile);
+router.get("/profile:id", adminauth, adminProfile);
 router.put("/update");
 router.delete("/delete");
 

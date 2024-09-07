@@ -23,7 +23,7 @@ const adminSignup = async (req, res, next) => {
         const token = generatetoken(newUser._id, "mentor");
 
         res.cookie("token", token);
-        res.json({ success: true, message: "mentor created successfully" });
+        res.json({ success: true, message: "admin created successfully" });
     } catch (error) {
         console.log(error);
         res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });

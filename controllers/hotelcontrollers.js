@@ -1,4 +1,3 @@
-// controllers/hotelcontrollers.js
 
 const { hotel } = require('../models/hotelmodels');
 
