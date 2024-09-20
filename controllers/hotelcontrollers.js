@@ -1,5 +1,7 @@
-
+const mongoose = require('mongoose'); 
+const { cloudinaryInstane } = require('../config.js/cloudinaryconfig');
 const { hotel } = require('../models/hotelmodels');
+const { handleimageupload } = require('../utils/imageupload');
 
 
 const createhotel = async (req, res) => {
@@ -18,6 +20,7 @@ const createhotel = async (req, res) => {
             isActive,
             image
         } = req.body;
+        let imageurl
 
         if (!name || !city || !country || !phone || !email) {
             return res.status(400).json({ message: 'Missing required fields: name, city, country, phone, and email are required.' });
@@ -27,7 +30,10 @@ const createhotel = async (req, res) => {
         if (ishotelexist) {
             return res.status(400).json({ success: false, message: "Hotel already exists" });
         }
+        if(req.file){
+       imageurl=await handleimageupload(req.file.path)
 
+        }
         const newhotel = new hotel({
             name,
             address: { street, city, state, postalcode, country },
@@ -39,7 +45,7 @@ const createhotel = async (req, res) => {
             openingHours: { open, close },
             fooditems,
             isActive,
-            image
+          image: imageurl
         });
 
         const savedhotels = await newhotel.save();
@@ -60,7 +66,7 @@ const getallhotels = async (req, res) => {
         if (!hotels || hotels.length === 0) {
             return res.status(200).json({ message: "Empty database" });
         }
-        res.status(200).json(hotels);
+        res.status(200).json({data:hotels});
     } catch (err) {
         res.status(500).json({ message: "Failed to retrieve all hotels", error: err.message });
     }
@@ -68,15 +74,24 @@ const getallhotels = async (req, res) => {
 
 const gethotelbyid = async (req, res) => {
     try {
-        const hotel = await hotel.findById(req.params.id);
-        if (!hotel) {
+        const hotelId = req.params.id; // Store ID in a variable
+        // Check if ID is valid before querying the database
+        if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+            return res.status(400).json({ message: "Invalid hotel ID format" });
+        }
+        
+        const foundHotel = await hotel.findById(hotelId); // Use correct model name (e.g., Hotel)
+        if (!foundHotel) {
             return res.status(404).json({ message: "Hotel not found" });
         }
-        res.status(200).json(hotel);
+        
+        res.status(200).json({ data: foundHotel });
     } catch (error) {
+        console.error('Error retrieving hotel:', error); // Log error details for debugging
         res.status(500).json({ message: "Failed to retrieve the hotel", error: error.message });
     }
 };
+
 
 
 

@@ -1,4 +1,6 @@
-const { admin } = require("../models/adminmodels.js");
+const express = require("express");
+const {admin}=require("../models/adminmodels")
+
 const bcrypt = require("bcrypt");
 const { generatetoken } = require("../utils/token");
 
@@ -60,7 +62,7 @@ const adminLogin = async (req, res, next) => {
     }
 };
 
-const adminLogout = async (req, res, next) => {
+ adminLogout = async (req, res, next) => {
     try {
         res.clearCookie("token");
         res.json({ message: "user logout success", success: true });
@@ -70,7 +72,7 @@ const adminLogout = async (req, res, next) => {
     }
 };
 
-const adminProfile = async (req, res, next) => {
+ const adminProfile = async (req, res, next) => {
     try {
         const admin = req.user;
         
@@ -82,7 +84,7 @@ const adminProfile = async (req, res, next) => {
         res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 }
-const checkadmin = async (req, res, next) => {
+ const checkadmin = async (req, res, next) => {
     try {
         const { admin } = req;
         if (!admin) {

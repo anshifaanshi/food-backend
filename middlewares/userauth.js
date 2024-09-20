@@ -1,23 +1,25 @@
 const jwt = require("jsonwebtoken");
-const { userauth } = require("../controllers/usercontrollers");
 
-const userAuth = (req, res, next) => {
+const userauth = (req, res, next) => {
     try {
         const { token } = req.cookies;
         if (!token) {
-            return res.status(401).json({ success: false, message: "user not autherized" });
+            return res.status(401).json({ success: false, message: "User not authorized, cookies not found" });
         }
+
         const tokenVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
         if (!tokenVerified) {
-            return res.status(401).json({ success: false, message: "user not autherizedF" });
+            return res.status(401).json({ success: false, message: "User not verified" });
         }
 
         req.user = tokenVerified;
+        next(); 
 
-        next();
     } catch (error) {
         console.log(error);
-        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
-module.exports={userauth}
+
+
+module.exports = { userauth };

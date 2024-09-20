@@ -12,7 +12,7 @@ router.get('/foodbyid:id', getFoodItemById);
 router.post('/createfood', adminauth,createFoodItem);
 
 
-router.put('/update:id',adminauth, updateFoodItem);
+router.put('/update:id', adminauth,updateFoodItem);
 
 
 router.delete('/delete:id',adminauth, deleteFoodItem);

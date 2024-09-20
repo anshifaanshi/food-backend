@@ -1,15 +1,20 @@
 const express = require('express');
+const dotenv=require('dotenv')
 const cookieParser = require('cookie-parser');  // Import cookie-parser
 const { apirouter } = require('./routes');
 const { connectdb } = require('./config.js/db');
+const cors=require('cors');
 
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());  // Use cookie-parser middleware
-
-const port = 3002;
+app.use(cors({
+    origin:'http://localhost:5174',
+    credentials:true,
+}))
+const port = 3000;
 
 connectdb();
 

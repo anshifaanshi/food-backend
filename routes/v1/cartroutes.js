@@ -7,6 +7,6 @@ const router = express.Router();
 router.post("/add-to-cart", userauth, addToCart);
 router.delete("/remove", userauth, removeFromCart);
 router.get("/getCart", userauth, getCart);
-router.put('/update',updateCart)
+router.put('/update', userauth, updateCart); // Added userauth middleware
 
 module.exports = { cartRouter: router };
