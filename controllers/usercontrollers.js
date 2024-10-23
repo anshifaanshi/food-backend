@@ -1,10 +1,10 @@
-const { user } = require('../models/usermodels.js'); // Correct User import
+const { user: UserModel } = require('../models/usermodels.js'); // Correct User model import
 const bcrypt = require('bcrypt');
 const { generatetoken } = require('../utils/token.js'); // Ensure this file exists and works correctly
 const jwt = require("jsonwebtoken");
 const dotenv = require('dotenv');
 dotenv.config();
-const mongoose = require('mongoose');
+
 // User Signup Controller
 const usersignup = async (req, res, next) => {
     try {
@@ -15,7 +15,7 @@ const usersignup = async (req, res, next) => {
         }
 
         // Check if user already exists
-        const isUserExist = await user.findOne({ email });
+        const isUserExist = await UserModel.findOne({ email });
         if (isUserExist) {
             return res.status(400).json({ success: false, message: "User already exists" });
         }
@@ -25,7 +25,7 @@ const usersignup = async (req, res, next) => {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         // Create new user
-        const newUser = await user.create({
+        const newUser = await UserModel.create({
             name,
             email,
             password: hashedPassword,
@@ -61,7 +61,7 @@ const userlogin = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "All fields are required" });
         }
 
-        const userexist = await user.findOne({ email });
+        const userexist = await UserModel.findOne({ email });
         if (!userexist) {
             return res.status(404).json({ success: false, message: "User does not exist" });
         }
@@ -81,7 +81,7 @@ const userlogin = async (req, res, next) => {
             path: '/'
         });
 
-        return res.status(200).json({ success: true, message: "User logged in successfully" ,userexist});
+        return res.status(200).json({ success: true, message: "User logged in successfully", user: userexist });
 
     } catch (error) {
         console.error(error);
@@ -108,50 +108,43 @@ const userlogout = async (req, res, next) => {
 };
 
 // User Profile Controller
-
-const userprofile = async (req, res, next) => {
+const userProfile = async (req, res, next) => {
     try {
-        const { id } = req.params;
+        const { user } = req;
+        console.log(user, "=========user");
 
-        // Log the received id to check its value
-        console.log("Received ID:", id);
+        // Use .select() to exclude the password field
+        const userData = await UserModel.findOne({ _id: user.id }).select('-password');
 
-        // Validate if the id is a valid ObjectId
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ success: false, message: "Invalid user ID format" });
-        }
-
-        // Find user by ID
-        const userdata = await user.findById(id);
-        if (!userdata) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-
-        return res.json({ success: true, message: "User profile retrieved", data:userdata });
-
+        res.json({ success: true, message: "User data fetched", data: userData });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: error.message || "Internal server error" });
+        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 };
 
 
 // Check User Authorization Middleware
-const checkuser = (req, res, next) => {
+const checkuser = async (req, res, next) => {
     try {
         const { user } = req;
         if (!user) {
             return res.status(401).json({ success: false, message: "User not authorized" });
         }
-        
-        // Send user data along with the response
-        return res.json({ success: true, message: "User authorized", user });
+
+        // Fetch full user data from the database using the ID
+        const fullUserData = await UserModel.findById(user.id).select('name email role'); // Fetch name, email, and role
+
+        if (!fullUserData) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        return res.json({ success: true, message: "User authorized", data: fullUserData });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ success: false, message: "An error occurred", error: err.message });
     }
 };
-
 
 // User Authorization Middleware
 const userauth = (req, res, next) => {
@@ -161,14 +154,18 @@ const userauth = (req, res, next) => {
             return res.status(401).json({ success: false, message: "User not authorized, token missing" });
         }
 
-        // Verify the token
+        // Verify the token and extract user data
         const tokenVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
         if (!tokenVerified) {
             return res.status(401).json({ success: false, message: "User not verified" });
         }
 
-        // Attach user to request object
-        req.user = tokenVerified;
+        // Attach the user data (ID, role, etc.) to req.user
+        req.user = {
+            id: tokenVerified.id,  // Ensure your token contains the user ID
+            role: tokenVerified.role  // Example: if the token contains user's role
+        };
+
         next();
 
     } catch (error) {
@@ -177,4 +174,39 @@ const userauth = (req, res, next) => {
     }
 };
 
-module.exports = { usersignup, userlogin, userlogout, userprofile, userauth, checkuser };
+const userUpdate = async (req, res, next) => {
+    const { email, password, name } = req.body;
+
+    try {
+        const updates = {};
+        
+        if (email && email !== '') {
+            updates.email = email;
+        }
+        if (password && password !== '') {
+            updates.password = password; // Make sure to hash the password before saving
+        }
+        if (name && name !== '') {
+            updates.name = name;
+        }
+        
+        const updatedUser = await UserModel.findOneAndUpdate(
+            { email }, // Assuming you're finding by email, adjust if needed
+            { $set: updates },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json("User not found");
+        }
+
+        res.status(200).json({ message: "User updated successfully", user: updatedUser });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json("Internal server error");
+    }
+};
+
+
+
+module.exports = { usersignup, userlogin, userlogout, userProfile, userauth, checkuser ,userUpdate};

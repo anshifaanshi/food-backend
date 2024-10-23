@@ -4,74 +4,92 @@ const { hotel } = require('../models/hotelmodels');
 const { handleimageupload } = require('../utils/imageupload');
 
 
+
 const createhotel = async (req, res) => {
+  try {
+    console.log("Create hotel route hit");
+    console.log(req.file ,'====== image in controller')
+    const userId = req.user; // Assuming userId is obtained from the request
+
+    // Ensure userId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID format.' });
+    }
+
+    // Destructure fields from request body
+    const {
+      name,
+      address,
+      phone,
+      email,
+      website,
+      rating,
+      cuisineType,
+      openingHours,
+      fooditems,
+      isActive
+    } = req.body;
+let imageUrl;
+    // Validate required fields
+    if (!name || !phone || !email) {
+      return res.status(400).json({ message: 'Missing required fields: name, phone, and email are required.' });
+    }
+
+    let addressData = {};
+    if (address) {
+      const { street, city, state, postalcode, country } = address;
+
+      if (!city || !country) {
+        return res.status(400).json({ message: 'If provided, address must include city and country.' });
+      }
+
+      addressData = { street, city, state, postalcode, country };
+    }
+
+    const ishotelexist = await hotel.findOne({ name });
+    if (ishotelexist) {
+      return res.status(400).json({ success: false, message: "Hotel already exists" });
+    }
+    if(req.file){
+const uploadResult=await cloudinaryInstane.uploader.upload(req.file.path)
+imageUrl=uploadResult.url;
+console.log(uploadResult,'====uploadresult')
+    }
+   
+
+    const newhotel = new hotel({
+      name,
+      address: addressData,
+      phone,
+      email,
+      website,
+      rating,
+      cuisineType,
+      openingHours: openingHours ? { open: openingHours.open, close: openingHours.close } : null,
+      fooditems,
+      isActive,
+      image: imageUrl|| null,
+      admin: new mongoose.Types.ObjectId(userId) // Correctly instantiate the ObjectId
+    });
+
+    await newhotel.save();
+    return res.status(201).json({ success: true, message: "Hotel created successfully", hotel: newhotel });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "An error occurred while creating the hotel." });
+  }
+};
+
+  const getallhotels = async (req, res, next) => {
     try {
-        const userId=req.user;
-        const {
-            name,
-            address: { street, city, state, postalcode, country },
-            phone,
-            email,
-            website,
-            rating,
-            cuisineType,
-            openingHours: { open, close },
-            fooditems,
-            isActive,
-            image
-        } = req.body;
-        let imageurl
+        const hotels = await hotel.find()
 
-        if (!name || !city || !country || !phone || !email) {
-            return res.status(400).json({ message: 'Missing required fields: name, city, country, phone, and email are required.' });
-        }
-
-        const ishotelexist = await hotel.findOne({ name });
-        if (ishotelexist) {
-            return res.status(400).json({ success: false, message: "Hotel already exists" });
-        }
-        if(req.file){
-       imageurl=await handleimageupload(req.file.path)
-
-        }
-        const newhotel = new hotel({
-            name,
-            address: { street, city, state, postalcode, country },
-            phone,
-            email,
-            website,
-            rating,
-            cuisineType,
-            openingHours: { open, close },
-            fooditems,
-            isActive,
-          image: imageurl
-        });
-
-        const savedhotels = await newhotel.save();
-if(user.role==='admin') newhotel.admin=user.id;
-
-
-        res.status(201).json(savedhotels);
-
+        res.status(200).json({ success: true, message: "courses fetched", data: hotels });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Failed to create hotel", error: error.message });
+        next(error);
     }
 };
-
-const getallhotels = async (req, res) => {
-    try {
-        const hotels = await hotel.find();
-        if (!hotels || hotels.length === 0) {
-            return res.status(200).json({ message: "Empty database" });
-        }
-        res.status(200).json({data:hotels});
-    } catch (err) {
-        res.status(500).json({ message: "Failed to retrieve all hotels", error: err.message });
-    }
-};
-
 const gethotelbyid = async (req, res) => {
     try {
         const hotelId = req.params.id; // Store ID in a variable
@@ -92,9 +110,6 @@ const gethotelbyid = async (req, res) => {
     }
 };
 
-
-
-
 const updatehotels=async(req,res,next)=>{
     try {
         const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, {
@@ -111,9 +126,29 @@ const updatehotels=async(req,res,next)=>{
         res.status(400).json({ error: error.message });
     }
 }
+
+
+const deletehotel=async (req,res)=>{
+  try{
+
+    const response= await hotel.findByIdAndDelete(req.body.id)
+    if(response){
+      res.status(200).json("deleted successfully")
+    }
+    else{
+      res.status(400).json('not found hotel')
+    }
+
+
+  }catch(error){
+    res.status(500).json("internal server error")
+
+  }
+}
 module.exports = {
     createhotel,
     getallhotels,
     gethotelbyid,
-    updatehotels
+    updatehotels,
+    deletehotel
 };

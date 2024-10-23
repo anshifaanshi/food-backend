@@ -1,7 +1,7 @@
 const handleimageupload=async(path)=>{
     try{
-        const imageresult=await  cloudinaryInstane.uploader.upload(req.file.path)
-      return imageresult.url
+        const uploadResult= await  cloudinaryInstane.uploader.upload(req.file.path)
+      return uploadResult.url
 
     }catch(error){
 

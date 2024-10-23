@@ -1,80 +1,86 @@
 // controllers/couponController.js
-const Coupon = require('../models/CouponModel');
+const Coupon = require("../models/CouponModel");
+const {Cart} = require("../models/cartmodels");
 
+// Create a new coupon
 exports.createCoupon = async (req, res) => {
-  try {
-    const { code, discount, expiryDate, usageLimit } = req.body;
+  const { code, discount, expiryDate } = req.body;
 
-    // Validate input
-    if (!code || !discount || !expiryDate) {
-      return res.status(400).json({ message: 'All fields are required' });
+  try {
+    const newCoupon = new Coupon({ code, discount, expiryDate });
+    await newCoupon.save();
+    res.status(201).json({ message: 'Coupon created successfully!' });
+  } catch (err) {
+    res.status(400).json({ error: 'Error creating coupon: ' + err.message });
+  }
+};
+
+// Validate a coupon
+exports.validateCoupon = async (req, res) => {
+  const { code } = req.body;
+
+  try {
+    const coupon = await Coupon.findOne({ code });
+
+    if (!coupon) {
+      return res.status(404).json({ error: 'Invalid coupon code' });
     }
 
-    // Create coupon
-    const coupon = new Coupon({
-      code,
-      discount,
-      expiryDate,
-      usageLimit,
+    // Check if the coupon is expired or inactive
+    if (new Date(coupon.expiryDate) < Date.now() || !coupon.isActive) {
+      return res.status(400).json({ error: 'Coupon expired or inactive' });
+    }
+
+    // Coupon is valid
+    res.status(200).json({ message: 'Coupon is valid', discount: coupon.discount });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error: ' + err.message });
+  }
+};
+
+// Apply coupon in checkout
+exports.applyCoupon = async (req, res) => {
+  const { couponCode, cartId } = req.body;
+
+  try {
+    console.log("Received couponCode:", couponCode);
+    console.log("Received cartId:", cartId);
+
+    const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
+    console.log("Found coupon:", coupon);
+
+    if (!coupon) {
+      return res.status(400).json({ message: 'Invalid or inactive coupon code' });
+    }
+
+    const cart = await Cart.findById(cartId);
+    console.log("Found cart:", cart);
+
+    if (!cart) {
+      return res.status(400).json({ message: 'Cart not found' });
+    }
+
+    cart.calculateTotalPrice(); // Call calculateTotalPrice before using totalPrice
+console.log("Cart total price after calculation:", cart.totalPrice);
+
+
+    const discount = (cart.totalPrice * coupon.discount) / 100;
+    console.log("Calculated discount:", discount);
+
+    const finalAmount = cart.totalPrice - discount;
+    console.log("Final amount after applying discount:", finalAmount);
+
+    const amountToPay = finalAmount < 0 ? 0 : finalAmount;
+
+    return res.status(200).json({
+      message: 'Coupon applied successfully',
+      finalAmount: amountToPay,
     });
-
-    await coupon.save();
-    res.status(201).json({ message: 'Coupon created successfully', coupon });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
-  }
-};
-
-exports.getCoupon = async (req, res) => {
-  try {
-    const { code } = req.params;
-
-    // Find coupon
-    const coupon = await Coupon.findOne({ code });
-    if (!coupon) {
-      return res.status(404).json({ message: 'Coupon not found' });
-    }
-
-    // Check if the coupon is expired or usage limit is exceeded
-    if (new Date(coupon.expiryDate) < new Date()) {
-      return res.status(400).json({ message: 'Coupon has expired' });
-    }
-
-    if (coupon.usedCount >= coupon.usageLimit) {
-      return res.status(400).json({ message: 'Coupon usage limit exceeded' });
-    }
-
-    res.status(200).json({ coupon });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
-  }
-};
-
-exports.useCoupon = async (req, res) => {
-  try {
-    const { code } = req.params;
-
-    // Find coupon
-    const coupon = await Coupon.findOne({ code });
-    if (!coupon) {
-      return res.status(404).json({ message: 'Coupon not found' });
-    }
-
-    // Check if the coupon is expired or usage limit is exceeded
-    if (new Date(coupon.expiryDate) < new Date()) {
-      return res.status(400).json({ message: 'Coupon has expired' });
-    }
-
-    if (coupon.usedCount >= coupon.usageLimit) {
-      return res.status(400).json({ message: 'Coupon usage limit exceeded' });
-    }
-
-    // Update coupon usage
-    coupon.usedCount += 1;
-    await coupon.save();
-
-    res.status(200).json({ message: 'Coupon used successfully', coupon });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    console.error('Error applying coupon:', error);
+    return res.status(500).json({
+      message: 'Error applying coupon',
+      error: error.message || 'An unknown error occurred',
+    });
   }
 };

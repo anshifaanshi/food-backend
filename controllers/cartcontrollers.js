@@ -57,6 +57,8 @@ const addToCart = async (req, res) => {
     }
 };
 
+const mongoose = require('mongoose'); // Import mongoose to access ObjectId
+
 
 const removeFromCart = async (req, res) => {
     try {
@@ -69,10 +71,16 @@ const removeFromCart = async (req, res) => {
             return res.status(404).json({ message: "Cart not found" });
         }
 
+        // Debugging: Log cart items before removal
+        console.log('Before removal, cart items:', cart.foodItems);
+
         // Filter out the food item to be removed
         cart.foodItems = cart.foodItems.filter(item => 
-            !item.foodItemId.equals(foodItemId)
+            item.foodItemId.equals(foodItemId) // Proper ObjectId comparison
         );
+
+        // Debugging: Log cart items after removal
+        console.log('After removal, cart items:', cart.foodItems);
 
         // Recalculate total price if food items are removed
         cart.calculateTotalPrice();
@@ -81,7 +89,7 @@ const removeFromCart = async (req, res) => {
         await cart.save();
 
         // Send success response
-        res.status(200).json({ success: true, message: "Cart item removed", data: cart });
+        res.status(200).json({ success: true, message: "Cart item removed", cart });
     } catch (error) {
         console.error("Error in removeFromCart:", error);
         res.status(500).json({ message: "Internal server error", error: error.message || error });
@@ -90,20 +98,37 @@ const removeFromCart = async (req, res) => {
 
 
 
+
 const getCart = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user.id; // Ensure req.user is set correctly by your auth middleware
 
-        const cart = await Cart.findOne({ userId }).populate("FoodItem.FoodItemId");
+        const cart = await Cart.findOne({ userId }).populate("foodItems.foodItemId"); // Correct population path
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
         }
 
-        res.status(200).json(cart);
+        // Format the response to return relevant data, including the cart ID
+        const formattedCart = {
+            _id: cart._id, // Include the cart ID
+            userId: cart.userId,
+            foodItems: cart.foodItems.map(item => ({
+                foodItemId: item.foodItemId._id, // Ensure this matches your FoodItem schema
+                name: item.foodItemId.name,       // Accessing the name
+                price: item.price,                 // Use price from cart
+                quantity: item.quantity             // Accessing quantity in the cart
+            })),
+            totalPrice: cart.totalPrice || 0 // Safeguard for total price
+        };
+
+        res.status(200).json(formattedCart);
     } catch (error) {
+        console.error("Error retrieving cart:", error);
         res.status(500).json({ message: error.message || "Internal server error" });
     }
 };
+
+
 
 const updateCart = async (req, res) => {
     try {

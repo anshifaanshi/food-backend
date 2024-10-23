@@ -1,5 +1,8 @@
-// models/Coupon.js
+// models/coupon.js
 const mongoose = require('mongoose');
+
+// Import the Cart model (ensure this path is correct)
+const Cart = require('../models/cartmodels');
 
 const couponSchema = new mongoose.Schema({
   code: {
@@ -9,22 +12,21 @@ const couponSchema = new mongoose.Schema({
   },
   discount: {
     type: Number,
-    required: true, // Percentage or fixed amount
+    required: true,
   },
   expiryDate: {
     type: Date,
     required: true,
   },
-  usageLimit: {
-    type: Number,
-    default: 1, // Number of times the coupon can be used
+  isActive: {
+    type: Boolean,
+    default: true,
   },
-  usedCount: {
-    type: Number,
-    default: 0, // Number of times the coupon has been used
+  cartId: {
+    type: mongoose.Schema.Types.ObjectId, // Referencing the Cart model
+    ref: 'Cart', // Reference to Cart model
+    required: false, // Optional: coupons can be used without a specific cart
   },
 });
 
-const Coupon = mongoose.model('Coupon', couponSchema);
-
-module.exports = Coupon;
+module.exports = mongoose.model('Coupon', couponSchema);

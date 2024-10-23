@@ -8,13 +8,13 @@ const hotelschema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    address: {
-        street: String,
-        city: String,
-        state: String,
-        postalCode: String,
-        country: String,
-    },
+  address:{
+    street:String,
+    city:String,
+    state:String,
+    postalcode:String,
+    country:String
+  },
     phone: {
         type: String,
         required: true,

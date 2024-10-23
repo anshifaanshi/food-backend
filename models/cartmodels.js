@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const { FoodItem } = require("./fooditemsmodels");
 
 const cartSchema = new mongoose.Schema({
     userId: {
@@ -7,8 +6,8 @@ const cartSchema = new mongoose.Schema({
         ref: "User",
         required: true,
     },
-    FoodItem: [{
-        FoodItemId: {
+    foodItems: [{ // Changed to lowercase 'foodItems'
+        foodItemId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "FoodItem",
             required: true,
@@ -23,15 +22,16 @@ const cartSchema = new mongoose.Schema({
             default: 1,
         },
     }],
-    totalprice: {
+    totalPrice: { // Changed to lowercase 'totalPrice'
         type: Number,
         required: true,
         default: 0,
     }
 });
 
+// Method to calculate total price
 cartSchema.methods.calculateTotalPrice = function() {
-    this.totalprice = this.FoodItem.reduce((total, foodItem) => 
+    this.totalPrice = this.foodItems.reduce((total, foodItem) => 
         total + (foodItem.price * foodItem.quantity), 0
     );
 };

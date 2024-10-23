@@ -1,12 +1,20 @@
+// routes/couponRoutes.js
+// routes/v1/CouponRoutes.js
 const express = require('express');
 const router = express.Router();
-const couponController = require('../../controllers/CouponController');
-router.post('/create', couponController.createCoupon);
+const {
+  createCoupon,
+  validateCoupon,
+  applyCoupon,
+} = require('../../controllers/CouponController');
 
-// Get coupon details
-router.get('/:code', couponController.getCoupon);
+// Route to create a new coupon (admin only)
+router.post('/create', createCoupon);
 
-// Use a coupon
-router.post('/use/:code', couponController.useCoupon);
+// Route to validate a coupon
+router.post('/validate', validateCoupon);
 
-module.exports = router;
+// Route to apply coupon at checkout
+router.post('/checkout', applyCoupon);
+
+module.exports = router; // Export router instead of couponRoutes

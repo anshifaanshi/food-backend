@@ -11,10 +11,10 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());  // Use cookie-parser middleware
 app.use(cors({
-    origin:'http://localhost:5174',
+    origin:'http://localhost:5173',
     credentials:true,
 }))
-const port = 3000;
+const port = 3002;
 
 connectdb();
 

@@ -2,7 +2,7 @@
 
 
 const express = require("express");
-const {usersignup, userlogin, userlogout, userprofile, userauth, checkuser } = require('../../controllers/usercontrollers');
+const {usersignup, userlogin, userlogout, userProfile, userauth, checkuser, userUpdate } = require('../../controllers/usercontrollers');
 
 
 const router = express.Router();
@@ -16,16 +16,14 @@ router.post('/logout', userlogout);
 router.post('/signup', usersignup);
 
 // Fix the profile route to correctly handle the :id parameter
-router.get('/profile/:id', userauth, userprofile);
+router.get('/profile', userauth, userProfile);
 
-router.put('/update', userauth, (req, res) => {
-    res.send("User update route");
-});
+
 
 router.delete('/delete', (req, res) => {
     res.send("User delete route");
 });
 
 router.get('/checkuser', userauth, checkuser);
-
+router.put('/edit',userauth,userUpdate)
 module.exports = { userrouters: router };

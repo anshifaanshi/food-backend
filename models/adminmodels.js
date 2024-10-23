@@ -15,8 +15,8 @@ const adminSchema = new mongoose.Schema({
         required: true,
         minLenght: 8,
         trim: true,
-    }
-   
+    },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' }
 });
 
 const admin = mongoose.model("admin", adminSchema);
