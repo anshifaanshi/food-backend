@@ -1,6 +1,6 @@
 
 const express = require("express");
-const { userauth } = require("../../middlewares/userAuth");
+const { userauth } = require("../../middlewares/userauth");
 const { FoodItem } = require("../../models/fooditemsmodels");
 const stripe = require("stripe")(process.env.Stripe_Private_Api_Key);
 
