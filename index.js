@@ -9,9 +9,9 @@ const cors=require('cors');
 const app = express();
 
 app.use(express.json());
-app.use(cookieParser());  // Use cookie-parser middleware
+app.use(cookieParser());  
 app.use(cors({
-    origin:'https://food-frontend-rust.vercel.app/',
+    origin:'https://food-frontend-rust.vercel.app',
     credentials:true,
 }))
 const port = 3002;
