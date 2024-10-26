@@ -74,13 +74,13 @@ const userlogin = async (req, res, next) => {
         const token = generatetoken(userexist._id);
 
         // Set cookie
+       
         res.cookie('token', token, {
             httpOnly: true,
-            secure: true,
-            sameSite: 'None',
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict',
             path: '/'
         });
-
         return res.status(200).json({ success: true, message: "User logged in successfully", user: userexist });
 
     } catch (error) {
@@ -96,8 +96,8 @@ const userlogout = async (req, res, next) => {
         res.clearCookie('token', {
             path: '/',
             httpOnly: true,
-            secure: true,
-            sameSite: 'None'
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Strict'
         });
 
         res.status(200).json({ message: "User logged out successfully", success: true });
