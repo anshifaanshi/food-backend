@@ -50,7 +50,12 @@ const adminLogin = async (req, res, next) => {
 
         const token = generatetoken(adminExist._id, "admin");
 
-        res.cookie("token", token);
+        res.cookie("token", token, {
+            httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+            secure: true, // Ensures cookie is sent over HTTPS
+            sameSite: 'None', // Allows cross-origin requests
+            path: '/' // Cookie available throughout the site
+        });
         res.json({ success: true, message: "Admin login successful" });
     } catch (error) {
         console.log(error);
@@ -60,7 +65,13 @@ const adminLogin = async (req, res, next) => {
 
 const adminLogout = async (req, res, next) => {
     try {
-        res.clearCookie("token");
+       
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: true, // Match the secure flag used when setting the cookie
+            sameSite: 'None', // Match the sameSite setting
+            path: '/' // Ensure the cookie path matches
+        });
         res.json({ message: "User logout success", success: true });
     } catch (error) {
         console.log(error);

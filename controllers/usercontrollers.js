@@ -39,8 +39,8 @@ const usersignup = async (req, res, next) => {
         // Set cookie
         res.cookie('token', token, {
             httpOnly: true, // Helps prevent client-side scripts from accessing the cookie
-            secure: process.env.NODE_ENV === 'production', // Ensure cookie is sent over HTTPS in production
-            sameSite: 'Strict', // Helps prevent CSRF attacks
+            secure: true, // Ensure cookie is sent over HTTPS in production
+            sameSite: 'None', // Helps prevent CSRF attacks
             path: '/' // Ensure path is set correctly
         });
 
@@ -76,8 +76,8 @@ const userlogin = async (req, res, next) => {
         // Set cookie
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict',
+            secure: true,
+            sameSite: 'None',
             path: '/'
         });
 
@@ -96,8 +96,8 @@ const userlogout = async (req, res, next) => {
         res.clearCookie('token', {
             path: '/',
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict'
+            secure: true,
+            sameSite: 'None'
         });
 
         res.status(200).json({ message: "User logged out successfully", success: true });
