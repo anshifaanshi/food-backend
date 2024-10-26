@@ -10,6 +10,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());  
+res.cookie("token",token,{sameSite:"None",secure:true});
 app.use(cors({
     origin:'https://food-frontend-rust.vercel.app',
     credentials:true,
