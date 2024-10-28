@@ -34,36 +34,45 @@ const adminLogin = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
+        // Validate input
         if (!email || !password) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
+        // Check if admin exists
         const adminExist = await admin.findOne({ email });
         if (!adminExist) {
             return res.status(404).json({ success: false, message: "Admin does not exist" });
         }
 
+        // Validate password
         const passwordMatch = bcrypt.compareSync(password, adminExist.password);
         if (!passwordMatch) {
-            return res.status(401).json({ message: "User not authorized" });
+            return res.status(401).json({ message: "Invalid credentials" });
         }
 
+        // Generate token
         const token = generatetoken(adminExist._id, "admin");
-        console.log("Generated Token:", token);
 
-        res.cookie("token", token, {
+        // Set cookie options
+        const cookieOptions = {
             httpOnly: true,
             sameSite: "None",
-            secure: true,
+            secure: process.env.NODE_ENV === 'production', // Use secure cookie in production
             maxAge: 24 * 60 * 60 * 1000 // 1 day
-        });
+        };
 
-        res.json({ success: true, message: "Admin login successful" });
+        // Set cookie
+        res.cookie("token", token, cookieOptions);
+
+        // Respond with success message
+        res.json({ success: true, message: "Admin login successful", token });
     } catch (error) {
-        console.log("Error in adminLogin:", error);
+        console.error("Error in adminLogin:", error); // Logging error details
         res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 };
+
 
 
 

@@ -4,27 +4,25 @@ const adminauth = (req, res, next) => {
     try {
         const { token } = req.cookies;
         if (!token) {
-            return res.status(401).json({ success: false, message: "admin not autherized" });
+            return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
         }
+
+        // Verify the token
         const tokenVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        if (!tokenVerified) {
-            return res.status(401).json({ success: false, message: "admin not autherized" });
+
+        req.user = tokenVerified; // Store verified user information
+
+        // Check user role
+        if (tokenVerified.role !== "admin" && tokenVerified.role !== "user") {
+            return res.status(403).json({ success: false, message: "Unauthorized: Insufficient permissions" });
         }
 
-        console.log("tokenVerified=====", tokenVerified);
-
-        if (tokenVerified.role !== "user" && tokenVerified.role !== "admin") {
-            return res.status(401).json({ success: false, message: "user not autherized" });
-        }
-
-        req.user = tokenVerified;
-
+        // Proceed to the next middleware
         next();
     } catch (error) {
-        console.log(error);
-        res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
+        console.error("Error in adminauth:", error); // Log error details for debugging
+        res.status(401).json({ success: false, message: "Unauthorized: Invalid token" });
     }
 };
 
 module.exports = { adminauth };
-
