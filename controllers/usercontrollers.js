@@ -53,6 +53,7 @@ const usersignup = async (req, res, next) => {
 };
 
 // User Login Controller
+
 const userlogin = async (req, res, next) => {
     try {
         const { password, email } = req.body;
@@ -73,9 +74,13 @@ const userlogin = async (req, res, next) => {
 
         const token = generatetoken(userexist._id);
 
-        // Set cookie
-       
-       res.cookies("token",token,{sameSite:"None",secure:true});
+        // Set cookie correctly
+        res.cookie("token", token, {
+            sameSite: "None",
+            secure: true,
+            httpOnly: true, // Consider adding this for better security
+        });
+
         return res.status(200).json({ success: true, message: "User logged in successfully", user: userexist });
 
     } catch (error) {
@@ -83,6 +88,7 @@ const userlogin = async (req, res, next) => {
         return res.status(500).json({ message: error.message || "Server error" });
     }
 };
+
 
 // User Logout Controller
 const userlogout = async (req, res, next) => {
@@ -145,29 +151,29 @@ const checkuser = async (req, res, next) => {
 const userauth = (req, res, next) => {
     try {
         const { token } = req.cookies;
+
         if (!token) {
             return res.status(401).json({ success: false, message: "User not authorized, token missing" });
         }
 
         // Verify the token and extract user data
         const tokenVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        if (!tokenVerified) {
-            return res.status(401).json({ success: false, message: "User not verified" });
-        }
-
-        // Attach the user data (ID, role, etc.) to req.user
+        
+        // If the token verification fails, an error will be thrown, so we don't need to check for null
         req.user = {
             id: tokenVerified.id,  // Ensure your token contains the user ID
             role: tokenVerified.role  // Example: if the token contains user's role
         };
 
         next();
-
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Internal server error" });
+        console.error(error);
+        return res.status(401).json({ success: false, message: "User not verified" });
     }
 };
+
+
+   
 
 const userUpdate = async (req, res, next) => {
     const { email, password, name } = req.body;
