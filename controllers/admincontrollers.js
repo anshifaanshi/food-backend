@@ -30,7 +30,6 @@ const adminSignup = async (req, res, next) => {
         res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 };
-
 const adminLogin = async (req, res, next) => {
     try {
         const { email, password } = req.body;
@@ -49,12 +48,15 @@ const adminLogin = async (req, res, next) => {
             return res.status(401).json({ message: "User not authorized" });
         }
 
-    
         const token = generatetoken(adminExist._id, "admin");
         console.log("Generated Token:", token);
 
-        
-      res.cookie("token",token,{sameSite:"None",secure:true})
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "None",
+            secure: true,
+            maxAge: 24 * 60 * 60 * 1000 // 1 day
+        });
 
         res.json({ success: true, message: "Admin login successful" });
     } catch (error) {
@@ -63,7 +65,6 @@ const adminLogin = async (req, res, next) => {
     }
 };
 
-module.exports = { adminLogin };
 
 
 const adminLogout = async (req, res, next) => {
