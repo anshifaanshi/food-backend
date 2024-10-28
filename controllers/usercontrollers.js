@@ -75,12 +75,7 @@ const userlogin = async (req, res, next) => {
 
         // Set cookie
        
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict',
-            path: '/'
-        });
+       res.cookies("token",token,{sameSite:"None",secure:true});
         return res.status(200).json({ success: true, message: "User logged in successfully", user: userexist });
 
     } catch (error) {

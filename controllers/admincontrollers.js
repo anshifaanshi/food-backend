@@ -34,6 +34,7 @@ const adminSignup = async (req, res, next) => {
 const adminLogin = async (req, res, next) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
             return res.status(400).json({ message: "All fields are required" });
         }
@@ -48,15 +49,22 @@ const adminLogin = async (req, res, next) => {
             return res.status(401).json({ message: "User not authorized" });
         }
 
+    
         const token = generatetoken(adminExist._id, "admin");
-        res.cookie("token", token,{sameSite:"None", secure:true});
-       
+        console.log("Generated Token:", token);
+
+        
+      res.cookie("token",token,{sameSite:"None",secure:true})
+
         res.json({ success: true, message: "Admin login successful" });
     } catch (error) {
-        console.log(error);
+        console.log("Error in adminLogin:", error);
         res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
     }
 };
+
+module.exports = { adminLogin };
+
 
 const adminLogout = async (req, res, next) => {
     try {
