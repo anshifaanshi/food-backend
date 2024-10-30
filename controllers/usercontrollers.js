@@ -76,10 +76,11 @@ const userlogin = async (req, res, next) => {
 
         // Set cookie correctly
         res.cookie("token", token, {
-            sameSite: "None",
-            secure: true,
-            httpOnly: true, // Consider adding this for better security
+            sameSite: "None", // Required for cross-site cookies in production
+            secure: true,     // Ensure secure transmission over HTTPS
+            httpOnly: true,   // Helps prevent JavaScript access on the client
         });
+        
 
         return res.status(200).json({ success: true, message: "User logged in successfully", user: userexist });
 
@@ -97,8 +98,8 @@ const userlogout = async (req, res, next) => {
         res.clearCookie('token', {
             path: '/',
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict'
+            secure: true,
+            sameSite: 'None'
         });
 
         res.status(200).json({ message: "User logged out successfully", success: true });
