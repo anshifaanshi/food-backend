@@ -3,13 +3,17 @@ const { FoodItem } = require("../models/fooditemsmodels");
 
 const addToCart = async (req, res) => {
     try {
-        // Ensure that the user is authenticated and has a valid user ID
         const userId = req.user.id;
-        const { foodItemId } = req.body;
+        const { foodItemId, quantity } = req.body;
 
         // Check if foodItemId is provided in the request body
         if (!foodItemId) {
             return res.status(400).json({ message: "Food item ID is required" });
+        }
+
+        // Check if quantity is provided and is a valid number
+        if (!quantity || quantity <= 0) {
+            return res.status(400).json({ message: "Valid quantity is required" });
         }
 
         // Find the food item by its ID
@@ -24,26 +28,24 @@ const addToCart = async (req, res) => {
             cart = new Cart({ userId, foodItems: [] }); // Initialize a new cart
         }
 
-        // Ensure the cart's foodItems array is initialized
-        cart.foodItems = cart.foodItems || [];
-
         // Check if the food item already exists in the cart
-        const foodItemExists = cart.foodItems.some(item => 
+        const foodItemIndex = cart.foodItems.findIndex(item => 
             item.foodItemId.equals(foodItemId)
         );
 
-        if (foodItemExists) {
-            return res.status(400).json({ message: "Food item already exists in the cart" });
+        if (foodItemIndex >= 0) {
+            // If the item exists, update the quantity
+            cart.foodItems[foodItemIndex].quantity += quantity; // Add the new quantity
+        } else {
+            // If the item does not exist, add it to the cart
+            cart.foodItems.push({
+                foodItemId,
+                price: food.price,
+                quantity // Set the quantity from request
+            });
         }
 
-        // Add the food item to the cart
-        cart.foodItems.push({
-            foodItemId,
-            price: food.price,
-            quantity: 1 // Add default quantity of 1
-        });
-
-        // Calculate total price using the custom method (make sure this method exists)
+        // Calculate total price
         cart.calculateTotalPrice();
 
         // Save the cart
@@ -56,8 +58,6 @@ const addToCart = async (req, res) => {
         res.status(500).json({ message: error.message || "Internal server error" });
     }
 };
-
-const mongoose = require('mongoose'); // Import mongoose to access ObjectId
 
 
 const removeFromCart = async (req, res) => {

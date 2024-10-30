@@ -41,7 +41,7 @@ const usersignup = async (req, res, next) => {
             httpOnly: true, // Helps prevent client-side scripts from accessing the cookie
             secure: true, // Ensure cookie is sent over HTTPS in production
             sameSite: 'None', // Helps prevent CSRF attacks
-            path: '/' // Ensure path is set correctly
+             // Ensure path is set correctly
         });
 
         return res.status(201).json({ success: true, message: "User created successfully", user: newUser });
