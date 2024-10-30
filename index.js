@@ -16,7 +16,7 @@ app.use(cookieParser());
 const allowedOrigins = [
     'https://food-frontend-ll4c.vercel.app',
     'https://food-frontend-rust.vercel.app',
-       'http://localhost:5173'
+    'http://localhost:5173'
 ];
 
 app.use(cors({
@@ -24,12 +24,16 @@ app.use(cors({
         if (allowedOrigins.includes(origin) || !origin) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            console.error(`Blocked by CORS: ${origin}`); // Logs blocked origin
+            callback(new Error('Request blocked by CORS policy.'));
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
+
+// Handle pre-flight requests for all routes
+app.options("*", cors());
 
 const port = process.env.PORT || 3002;
 
@@ -42,7 +46,11 @@ app.use('/api', apirouter);
 // Endpoint to set a token in a cookie
 app.get('/set-token', (req, res) => {
     const token = "your_token_here"; 
-    res.cookie("token", token, { sameSite: "None", secure: true });
+    res.cookie("token", token, { 
+        sameSite: "None", 
+        secure: process.env.NODE_ENV === "production", // Only secure in production
+        httpOnly: true // Prevents client-side access to the cookie
+    });
     res.json({ message: "Token set in cookie" });
 });
 
