@@ -1,19 +1,15 @@
 const { Cart } = require("../models/cartmodels");
 const { FoodItem } = require("../models/fooditemsmodels");
 
+
 const addToCart = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { foodItemId, quantity } = req.body;
+        const { foodItemId, quantity = 1 } = req.body; // Set default quantity to 1
 
-        // Check if foodItemId is provided in the request body
+        // Validate foodItemId
         if (!foodItemId) {
             return res.status(400).json({ message: "Food item ID is required" });
-        }
-
-        // Check if quantity is provided and is a valid number
-        if (!quantity || quantity <= 0) {
-            return res.status(400).json({ message: "Valid quantity is required" });
         }
 
         // Find the food item by its ID
@@ -22,36 +18,33 @@ const addToCart = async (req, res) => {
             return res.status(404).json({ message: "Food item not found" });
         }
 
-        // Find the cart for the user, or create a new one if it doesn't exist
+        // Find or create the user's cart
         let cart = await Cart.findOne({ userId });
         if (!cart) {
-            cart = new Cart({ userId, foodItems: [] }); // Initialize a new cart
+            cart = new Cart({ userId, foodItems: [] });
         }
 
-        // Check if the food item already exists in the cart
+        // Check if the food item is already in the cart
         const foodItemIndex = cart.foodItems.findIndex(item => 
             item.foodItemId.equals(foodItemId)
         );
 
         if (foodItemIndex >= 0) {
-            // If the item exists, update the quantity
-            cart.foodItems[foodItemIndex].quantity += quantity; // Add the new quantity
+            // Update quantity if item exists
+            cart.foodItems[foodItemIndex].quantity += quantity;
         } else {
-            // If the item does not exist, add it to the cart
+            // Add new item with the default quantity
             cart.foodItems.push({
                 foodItemId,
                 price: food.price,
-                quantity // Set the quantity from request
+                quantity
             });
         }
 
-        // Calculate total price
+        // Calculate and save total price
         cart.calculateTotalPrice();
-
-        // Save the cart
         await cart.save();
 
-        // Return the updated cart
         res.status(200).json(cart);
     } catch (error) {
         console.error('Error adding to cart:', error);
