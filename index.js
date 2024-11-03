@@ -14,7 +14,7 @@ app.use(cookieParser());
 
 // Allow multiple origins for CORS
 const allowedOrigins = [
-   ' https://food-frontend-me.vercel.app',
+'https://food-frontend-me.vercel.app',
     'https://food-frontend-rust.vercel.app',
     'http://localhost:5173'
 ];
