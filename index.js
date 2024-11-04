@@ -36,7 +36,7 @@ app.use(cors({
 }));
 
 // Handle pre-flight requests
-app.options('*', cors());
+
 
 // Connect to the database
 connectdb();
