@@ -25,7 +25,7 @@ const allowedOrigins = [
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
+            callback(null, true); // Allow the request
         } else {
             console.error(`Blocked by CORS: ${origin}`);
             callback(new Error('Request blocked by CORS policy.'));
@@ -36,10 +36,20 @@ app.use(cors({
 }));
 
 // Handle pre-flight requests
-
+app.options('*', (req, res) => {
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.sendStatus(200); // Respond with a 200 OK for pre-flight requests
+});
 
 // Connect to the database
-connectdb();
+connectdb()
+    .then(() => {
+        console.log("Database connected successfully.");
+    })
+    .catch(err => {
+        console.error("Database connection failed:", err);
+    });
 
 // API routes
 app.use('/api', apirouter);
@@ -58,6 +68,12 @@ app.get('/set-token', (req, res) => {
 // Handle undefined routes
 app.all("*", (req, res) => {
     res.status(404).json({ message: "Endpoint does not exist" });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
 });
 
 // Start the server
