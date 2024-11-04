@@ -2,7 +2,7 @@
 const express = require("express");
 const { userauth } = require("../../middlewares/userauth");
 const stripe = require("stripe")(process.env.Stripe_Private_Api_Key);
-const client_domain = process.env.CLIENT_DOMAIN;
+const client_domain = process.env.client_domain;
 
 const router = express.Router();
 
