@@ -33,10 +33,11 @@ router.post("/create-checkout-session", userauth, async (req, res, next) => {
             success_url: `${client_domain}/user/payment/success`,
             cancel_url: `${client_domain}/user/payment/cancel`,
         });
-
+        console.log("Checkout session created successfully:", session.id)
         res.json({ success: true, sessionId: session.id });
     } catch (error) {
         console.error("Error creating checkout session:", error);
+        res.status(500).json({ error: "Failed to create checkout session", details: error.message });
         next(error); 
     }
 });
