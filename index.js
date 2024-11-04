@@ -1,6 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const cookieParser = require('cookie-parser');  
+const cookieParser = require('cookie-parser');
 const { apirouter } = require('./routes');
 const { connectdb } = require('./config.js/db');
 const cors = require('cors');
@@ -8,13 +8,15 @@ const cors = require('cors');
 dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 3002;
 
+// Middleware to parse JSON and cookies
 app.use(express.json());
 app.use(cookieParser());
 
-// Allow multiple origins for CORS
+// CORS configuration
 const allowedOrigins = [
-'https://food-frontend-me.vercel.app',
+    'https://food-frontend-me.vercel.app',
     'https://food-frontend-rust.vercel.app',
     'http://localhost:5173',
     'https://food-frontend-ten.vercel.app'
@@ -22,10 +24,10 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: (origin, callback) => {
-        if (allowedOrigins.includes(origin) || !origin) {
+        if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            console.error(`Blocked by CORS: ${origin}`); // Logs blocked origin
+            console.error(`Blocked by CORS: ${origin}`);
             callback(new Error('Request blocked by CORS policy.'));
         }
     },
@@ -33,24 +35,22 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
 
-// Handle pre-flight requests for all routes
-app.options("*", cors());
+// Handle pre-flight requests
+app.options('*', cors());
 
-const port = process.env.PORT || 3002;
-
-// Connect to database
+// Connect to the database
 connectdb();
 
-// Use the API routes
+// API routes
 app.use('/api', apirouter);
 
 // Endpoint to set a token in a cookie
 app.get('/set-token', (req, res) => {
-    const token = "your_token_here"; 
-    res.cookie("token", token, { 
-        sameSite: "None", 
-        secure: process.env.NODE_ENV === "production", // Only secure in production
-        httpOnly: true // Prevents client-side access to the cookie
+    const token = "your_token_here"; // Use a real token generation here
+    res.cookie("token", token, {
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true
     });
     res.json({ message: "Token set in cookie" });
 });
