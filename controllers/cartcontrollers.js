@@ -6,7 +6,9 @@ const addToCart = async (req, res) => {
     try {
         const userId = req.user.id;
         const { foodItemId, quantity = 1 } = req.body; // Set default quantity to 1
-
+if(!userId){
+    return res.status(400).json({message:"please login"})
+}
         // Validate foodItemId
         if (!foodItemId) {
             return res.status(400).json({ message: "Food item ID is required" });
