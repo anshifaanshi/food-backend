@@ -1,6 +1,6 @@
+
 const { Cart } = require("../models/cartmodels");
 const { FoodItem } = require("../models/fooditemsmodels");
-
 
 const addToCart = async (req, res) => {
     try {
@@ -30,8 +30,11 @@ const addToCart = async (req, res) => {
         );
 
         if (foodItemIndex >= 0) {
-            // Update quantity if item exists
-            cart.foodItems[foodItemIndex].quantity += quantity;
+            // If item already exists, send a response that the item is already in the cart
+            return res.status(400).json({
+                message: "Item already exists in the cart",
+                cart: cart // Send the current cart as part of the response
+            });
         } else {
             // Add new item with the default quantity
             cart.foodItems.push({
@@ -51,7 +54,6 @@ const addToCart = async (req, res) => {
         res.status(500).json({ message: error.message || "Internal server error" });
     }
 };
-
 
 const removeFromCart = async (req, res) => {
     try {
