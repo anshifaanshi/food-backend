@@ -4,7 +4,7 @@ const userauth = (req, res, next) => {
     try {
         const { token } = req.cookies;
         if (!token) {
-            return res.status(401).json({ success: false, message: "User not authorized, cookies not found" });
+            return res.status(401).json({ success: false, message: "please login" });
         }
 
         const tokenVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
