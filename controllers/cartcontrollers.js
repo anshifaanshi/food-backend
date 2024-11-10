@@ -163,18 +163,18 @@ const updateCart = async (req, res) => {
 
 
 const updateCartItemQuantity = async (req, res) => {
-    const { itemId, quantity } = req.body;
+    const {foodItemId , quantity } = req.body;
   
     try {
       // Find the cart containing the item
-      const cart = await Cart.findOne({ "items._id": itemId });
+      const cart = await Cart.findOne({ "items._id": foodItemId });
   
       if (!cart) {
         return res.status(404).json({ success: false, message: "Cart item not found" });
       }
   
       // Find the item within the cart and update its quantity
-      const item = cart.items.id(itemId);
+      const item = cart.items.id(foodItemId);
       item.quantity = quantity;
   
       // Recalculate the total price using the calculateTotalPrice method
