@@ -161,4 +161,42 @@ const updateCart = async (req, res) => {
     }
 };
 
-module.exports = { addToCart, removeFromCart, getCart, updateCart };
+
+const updateCartItemQuantity = async (req, res) => {
+    const { itemId, quantity } = req.body;
+  
+    try {
+      // Find the cart containing the item
+      const cart = await Cart.findOne({ "items._id": itemId });
+  
+      if (!cart) {
+        return res.status(404).json({ success: false, message: "Cart item not found" });
+      }
+  
+      // Find the item within the cart and update its quantity
+      const item = cart.items.id(itemId);
+      item.quantity = quantity;
+  
+      // Recalculate the total price using the calculateTotalPrice method
+      const updatedTotalPrice = cart.calculateTotalPrice();
+  
+      // Save the updated cart with new total price
+      await cart.save();
+  
+      // Send a success response with updated total price and items
+      res.json({
+        success: true,
+        message: "Quantity updated successfully",
+        cartItems: cart.items,
+        totalPrice: updatedTotalPrice
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: "Failed to update quantity" });
+    }
+  };
+  
+
+
+
+module.exports = { addToCart, removeFromCart, getCart, updateCart,updateCartItemQuantity };
