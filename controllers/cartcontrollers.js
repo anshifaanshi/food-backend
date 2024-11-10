@@ -163,27 +163,36 @@ const updateCart = async (req, res) => {
 
 
 const updateCartItemQuantity = async (req, res) => {
-    const {foodItemId , quantity } = req.body;
+    const { foodItemId, quantity } = req.body;
   
     try {
+      console.log("Request foodItemId:", foodItemId);
+      console.log("Requested quantity:", quantity);
+  
       // Find the cart containing the item
       const cart = await Cart.findOne({ "items._id": foodItemId });
   
       if (!cart) {
+        console.error("Cart item not found.");
         return res.status(404).json({ success: false, message: "Cart item not found" });
       }
   
       // Find the item within the cart and update its quantity
       const item = cart.items.id(foodItemId);
+      if (!item) {
+        console.error("Item not found in cart.");
+        return res.status(404).json({ success: false, message: "Item not found in cart" });
+      }
+  
       item.quantity = quantity;
   
       // Recalculate the total price using the calculateTotalPrice method
       const updatedTotalPrice = cart.calculateTotalPrice();
+      console.log("New Total Price:", updatedTotalPrice);
   
-      // Save the updated cart with new total price
+      // Save the updated cart
       await cart.save();
   
-      // Send a success response with updated total price and items
       res.json({
         success: true,
         message: "Quantity updated successfully",
@@ -191,12 +200,10 @@ const updateCartItemQuantity = async (req, res) => {
         totalPrice: updatedTotalPrice
       });
     } catch (error) {
-      console.error(error);
+      console.error("Error updating quantity:", error.message);
       res.status(500).json({ success: false, message: "Failed to update quantity" });
     }
   };
   
-
-
-
-module.exports = { addToCart, removeFromCart, getCart, updateCart,updateCartItemQuantity };
+  module.exports = { addToCart, removeFromCart, getCart, updateCart, updateCartItemQuantity };
+  
