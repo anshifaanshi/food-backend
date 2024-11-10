@@ -166,31 +166,26 @@ const updateCartItemQuantity = async (req, res) => {
     const { foodItemId, quantity } = req.body;
   
     try {
-      console.log("Request foodItemId:", foodItemId);
-      console.log("Requested quantity:", quantity);
+      console.log("Received foodItemId:", foodItemId);
+      console.log("New Quantity:", quantity);
   
-      // Find the cart containing the item
-      const cart = await Cart.findOne({ "items._id": foodItemId });
-  
+      // Convert foodItemId if needed
+      const cart = await Cart.findOne({ "items._id": mongoose.Types.ObjectId(foodItemId) });
       if (!cart) {
-        console.error("Cart item not found.");
+        console.error("Cart not found for provided foodItemId.");
         return res.status(404).json({ success: false, message: "Cart item not found" });
       }
   
-      // Find the item within the cart and update its quantity
       const item = cart.items.id(foodItemId);
       if (!item) {
-        console.error("Item not found in cart.");
+        console.error("Item not found within cart items.");
         return res.status(404).json({ success: false, message: "Item not found in cart" });
       }
   
       item.quantity = quantity;
-  
-      // Recalculate the total price using the calculateTotalPrice method
       const updatedTotalPrice = cart.calculateTotalPrice();
-      console.log("New Total Price:", updatedTotalPrice);
+      console.log("Calculated updated total price:", updatedTotalPrice);
   
-      // Save the updated cart
       await cart.save();
   
       res.json({
@@ -200,7 +195,7 @@ const updateCartItemQuantity = async (req, res) => {
         totalPrice: updatedTotalPrice
       });
     } catch (error) {
-      console.error("Error updating quantity:", error.message);
+      console.error("Error during quantity update:", error.message);
       res.status(500).json({ success: false, message: "Failed to update quantity" });
     }
   };
