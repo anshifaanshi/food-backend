@@ -165,14 +165,11 @@ const clearcart = async (req, res) => {
     try {
         console.log("Clear cart endpoint called");
 
-        if (req.session && req.session.cart) {
+    
             req.session.cart = [];  // Clear the cart stored in the session
             console.log("Cart cleared successfully in session");
             return res.status(200).json({ message: "Cart cleared successfully" });
-        } else {
-            console.log("No cart found in session to clear");
-            return res.status(404).json({ message: "No cart to clear" });
-        }
+        
     } catch (error) {
         console.error("Error in clearcart function:", error); // Logs detailed error message to server console
         return res.status(500).json({ message: "Internal server error" });
