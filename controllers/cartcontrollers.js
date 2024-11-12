@@ -164,51 +164,20 @@ const updateCart = async (req, res) => {
 
 const clearcart = async (req, res) => {
     try {
-        const { userId } = req.body;  // Assuming you send the userId in the body of the request
+        const userId = req.user.id; // JWT token should set user ID in the request
         
         if (!userId) {
-            return res.status(400).json({ message: "User ID is required" });
+            return res.status(400).json({ message: 'User ID not found in the token' });
         }
 
-        // Find the cart by userId
-        const cart = await Cart.findOne({ userId });
+        // Clear the cart for the authenticated user
+        await Cart.deleteOne({ userId: userId });
 
-        if (!cart) {
-            return res.status(404).json({ message: "Cart not found for this user" });
-        }
-
-        // Remove the cart for the given user
-        await Cart.findOneAndDelete({ userId });
-
-        console.log("Cart cleared successfully for user:", userId);
-
-        return res.status(200).json({ message: "Cart cleared successfully" });
+        res.status(200).json({ message: 'Cart cleared successfully' });
     } catch (error) {
-        console.error("Error in clearcart function:", error);
-        return res.status(500).json({ message: "Internal server error" });
+        console.error("Error clearing cart:", error);
+        res.status(500).json({ message: 'Failed to clear cart' });
     }
 };
 
-    
-
-
-
-
-
-
-
-
-
-
-
-          
-    
-
-        
-           
-       
-
-
-  
-  module.exports = { addToCart, removeFromCart, getCart, updateCart,clearcart};
-  
+module.exports = { addToCart, removeFromCart, getCart, updateCart, clearcart };
