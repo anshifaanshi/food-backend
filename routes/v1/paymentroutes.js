@@ -52,45 +52,28 @@ router.post("/create-checkout-session", userauth, async (req, res, next) => {
 });
 
 // Webhook to handle Stripe events
-router.post("/webhook", bodyParser.raw({ type: "application/json" }), async (req, res) => {
-    const sig = req.headers["stripe-signature"];
-    const endpointSecret = process.env.Stripe_Webhook_Secret;
 
-    let event;
-
-    try {
-        // Verify the Stripe event
-        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-    } catch (err) {
-        console.error("Webhook signature verification failed:", err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    // Handle the event
-    if (event.type === "checkout.session.completed") {
-        const session = event.data.object;
-
-        // Retrieve the user ID from the session metadata
-        const userId = session.metadata.userId;
-
-        // Clear the cart for the user in the database
-        try {
-            await clearUserCart(userId);
-            console.log(`Cart cleared for user: ${userId}`);
-        } catch (error) {
-            console.error("Error clearing cart:", error);
-        }
-    }
-
-    res.json({ received: true });
-});
-
-// Helper function to clear the cart
-async function clearUserCart(userId) {
-    // Logic to clear the cart from the database for the user
-    // This depends on your specific database setup
     // For example, if using MongoDB:
-    await Cart.deleteMany({ userId: userId });
-}
+    router.get("/user/payment/success", userauth, async (req, res) => {
+        const { status } = req.query;
+    
+        // Verify if the payment was successful
+        if (status === "success") {
+            try {
+                // Clear the user's cart here
+                // Assuming you have a Cart model or method to clear the cart
+                await Cart.clearCartForUser(req.user.id);
+    
+                // Redirect or send a success response
+                return res.redirect("/user/dashboard"); // Adjust this URL as needed
+            } catch (error) {
+                console.error("Error clearing cart:", error);
+                return res.status(500).json({ error: "Failed to clear cart after payment" });
+            }
+        } else {
+            return res.status(400).json({ error: "Payment was not successful" });
+        }
+    });
+    
 
 module.exports = { paymentRouter: router };
