@@ -163,26 +163,14 @@ const updateCart = async (req, res) => {
 
 const clearcart=async (req,res)=>{
    
-    try {
-        const userId = req.user.id; // Assuming user ID is available in `req.user` from userauth middleware
-
-        // Find the user's cart and clear it
-        const cart = await Cart.findOneAndUpdate(
-            { userId },
-            { $set: { items: [] } }, // Clear items array
-            { new: true }
-        );
-
-        if (!cart) {
-            return res.status(404).json({ error: "Cart not found" });
-        }
-
-        res.status(200).json({ success: true, message: "Cart cleared successfully" });
-    } catch (error) {
-        console.error("Error clearing cart:", error);
-        res.status(500).json({ error: "Failed to clear cart" });
+    if (req.session.cart) {
+        req.session.cart = [];  // Clear the cart stored in the session
+        return res.status(200).json({ message: "Cart cleared successfully" });
     }
-};
+    res.status(400).json({ message: "No cart to clear" });
+}
+
+        
 
 
     
