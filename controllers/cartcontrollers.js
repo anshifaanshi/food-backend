@@ -162,55 +162,13 @@ const updateCart = async (req, res) => {
 };
 
 
-const updateCartItemQuantity = async (req, res) => {
-    const userId = req.user.id; // Ensure req.user is set correctly by your auth middleware
-    const { foodItemId, quantity } = req.body;
 
-    try {
-        // Find the cart by userId
-        const cart = await Cart.findOne({ userId });
-        if (!cart) {
-            return res.status(404).json({ success: false, message: "Cart not found" });
-        }
 
-        // Find the item within the cart's foodItems array
-        const item = cart.foodItems.find(item => item.foodItemId.equals(foodItemId));
-        if (!item) {
-            return res.status(404).json({ success: false, message: "Item not found in cart" });
-        }
-
-        // Update the item's quantity
-        item.quantity = quantity;
-
-        // Recalculate the total price using calculateTotalPrice
-        cart.calculateTotalPrice();
-
-        // Save the updated cart
-        await cart.save();
-
-        // Format the response to return relevant data, similar to getCart function
-        const formattedCart = {
-            _id: cart._id,
-            userId: cart.userId,
-            foodItems: cart.foodItems.map(item => ({
-                foodItemId: item.foodItemId,
-                name: item.foodItemId.name, // Ensure this is populated if needed
-                price: item.price,
-                quantity: item.quantity
-            })),
-            totalPrice: cart.totalPrice
-        };
-
-        // Send success response with updated cart data
-        res.status(200).json({ success: true, message: "Quantity updated successfully", cart: formattedCart });
-    } catch (error) {
-        console.error("Error updating quantity:", error);
-        res.status(500).json({ success: false, message: "Failed to update quantity", error: error.message || error });
-    }
-};
-
+        
+           
+       
 
 
   
-  module.exports = { addToCart, removeFromCart, getCart, updateCart, updateCartItemQuantity };
+  module.exports = { addToCart, removeFromCart, getCart, updateCart};
   

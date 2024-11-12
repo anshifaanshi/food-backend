@@ -8,6 +8,6 @@ router.post("/add-to-cart", userauth, addToCart);
 router.delete("/remove", userauth, removeFromCart);
 router.get("/getCart", userauth, getCart);
 router.put('/update', userauth, updateCart); // Added userauth middleware
-router.put('/update-quantity',updateCartItemQuantity)
+
 
 module.exports = { cartRouter: router };
