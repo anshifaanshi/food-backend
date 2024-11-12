@@ -21,7 +21,8 @@ const allowedOrigins = [
     'http://localhost:5173',
     
     
-    'https://food-frontend-psi.vercel.app'
+    'https://food-frontend-psi.vercel.app',
+     'https://food-frontend-2xctjic6w-anshifaanshis-projects.vercel.app'
 ];
 
 app.use(cors({
