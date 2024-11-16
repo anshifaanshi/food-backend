@@ -7,50 +7,38 @@ const client_domain = process.env.client_domain;
 const router = express.Router();
 
 // Create checkout session
-router.post("/create-checkout-session", userauth, async (req, res, next) => {
+
+// Create checkout session
+router.post("/create-checkout-session", userauth, async (req, res) => {
   try {
     const { products, amountInCents } = req.body;
 
-    // Ensure the amount is above the minimum allowed by Stripe (₹50 or 5000 cents)
-    const minimumAmountInCents = 5000;
+    // Ensure the amount is above the minimum allowed by Stripe ($0.50 or 50 cents)
+    const minimumAmountInCents = 50; // $0.50
     if (amountInCents < minimumAmountInCents) {
-      return res.status(400).json({ error: `The minimum amount for payment is ₹50 (5000 cents)` });
+      return res.status(400).json({ error: `The minimum amount for payment is $0.50 (50 cents)` });
     }
 
-    // Validate if products are provided
+    // Validate products
     if (!products || products.length === 0) {
       return res.status(400).json({ error: "No products provided" });
     }
 
     // Process line items
     const lineItems = products.map((product) => {
-      if (!product.price || product.price <= 0) {
-        product.price = 1; // Set to a minimum valid price if price is invalid
-      }
-
-      if (!product.quantity || product.quantity <= 0) {
-        product.quantity = 1; // Default to 1 if no valid quantity is provided
-      }
-
-      let unitAmount = Math.round(product.price * 100);  // Convert price to cents
-
-      // Ensure minimum charge amount (for example, minimum charge for ₹0.09 is ₹1 or 100 cents)
-      if (unitAmount < minimumAmountInCents) {
-        unitAmount = minimumAmountInCents;  // Set a minimum charge (5000 cents or ₹50)
-      }
-
-      console.log(`Product: ${product.name}, Unit Amount (in cents): ₹${product.price} => ${unitAmount} cents`);
+      const unitAmount = Math.round(product.price * 100); // Convert price to cents
+      if (unitAmount <= 0) throw new Error("Product price must be greater than 0");
 
       return {
         price_data: {
-          currency: "USD",
+          currency: "usd",
           product_data: {
             name: product.name,
-            images: [product.image],
+            images: [product.image || ""], // Optional: provide a default image
           },
-          unit_amount: unitAmount, // Stripe expects the price in cents
+          unit_amount: unitAmount, // Price in USD cents
         },
-        quantity: product.quantity,
+        quantity: product.quantity || 1, // Default to 1 if no valid quantity is provided
       };
     });
 
@@ -62,17 +50,20 @@ router.post("/create-checkout-session", userauth, async (req, res, next) => {
       success_url: `${client_domain}/user/payment/success`,
       cancel_url: `${client_domain}/user/payment/cancel`,
       metadata: {
-        userId: req.user.id,  // Assuming `req.user.id` is the authenticated user's ID
-        totalAmount: amountInCents,  // Optional: Store the total amount in metadata
+        userId: req.user.id, // Assuming `req.user.id` is the authenticated user's ID
+        totalAmount: amountInCents / 100, // Store total in USD for reference
       },
     });
 
     res.json({ success: true, sessionId: session.id });
   } catch (error) {
-    console.error("Error creating checkout session:", error);
+    console.error("Error creating checkout session:", error.message);
     res.status(500).json({ error: "Failed to create checkout session", details: error.message });
   }
 });
+
+
+
 
 module.exports = { paymentRouter: router };
 
