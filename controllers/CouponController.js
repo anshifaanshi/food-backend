@@ -25,6 +25,9 @@ exports.validateCoupon = async (req, res) => {
     if (!coupon) {
       return res.status(404).json({ error: 'Invalid coupon code' });
     }
+    if (totalprice < 10) {
+      return res.status(400).json({ error: 'Coupon cannot be applied to orders less than $10' });
+    }
 
     // Check if the coupon is expired or inactive
     if (new Date(coupon.expiryDate) < Date.now() || !coupon.isActive) {
