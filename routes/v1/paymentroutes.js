@@ -10,7 +10,7 @@ const Order=require("../../models/orderModel")
 
 // Create checkout session
 
-router.get("/user/orders",  async (req, res) => {
+router.get("/user/orders",userauth,  async (req, res) => {
   try {
     const userId = req.user.id;
     console.log("Fetching orders for user ID:", userId);
