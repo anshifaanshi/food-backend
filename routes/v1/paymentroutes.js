@@ -5,7 +5,7 @@ const stripe = require("stripe")(process.env.Stripe_Private_Api_Key);
 const client_domain = process.env.client_domain;
 
 const router = express.Router();
-
+const Order=require("../../models/orderModel")
 // Create checkout session
 
 // Create checkout session
