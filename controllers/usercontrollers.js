@@ -1,11 +1,11 @@
-const { user: UserModel } = require('../models/usermodels.js'); // Correct User model import
+const { user: UserModel } = require('../models/usermodels.js'); 
 const bcrypt = require('bcrypt');
-const { generatetoken } = require('../utils/token.js'); // Ensure this file exists and works correctly
+const { generatetoken } = require('../utils/token.js');
 const jwt = require("jsonwebtoken");
 const dotenv = require('dotenv');
 dotenv.config();
 
-// User Signup Controller
+
 const usersignup = async (req, res, next) => {
     try {
         const { name, email, password, phone, profilepic, hotels } = req.body;

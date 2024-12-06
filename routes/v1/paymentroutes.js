@@ -9,6 +9,27 @@ const router = express.Router();
 // Create checkout session
 
 // Create checkout session
+
+router.get("/user/orders", userauth, async (req, res) => {
+  try {
+    // Fetch orders for the logged-in user
+    const userId = req.user.id; // Assuming `req.user` contains the authenticated user's info
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 }); // Sort by most recent orders
+
+    if (orders.length === 0) {
+      return res.status(404).json({ message: "No orders found for this user." });
+    }
+
+    res.status(200).json({ success: true, orders });
+  } catch (error) {
+    console.error("Error fetching orders:", error.message);
+    res.status(500).json({ error: "Failed to fetch orders", details: error.message });
+  }
+});
+
+
+
+
 router.post("/create-checkout-session", userauth, async (req, res) => {
   try {
     const { products, amountInCents } = req.body;
