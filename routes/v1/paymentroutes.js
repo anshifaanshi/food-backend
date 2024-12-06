@@ -12,9 +12,11 @@ const Order=require("../../models/orderModel")
 
 router.get("/user/orders", userauth, async (req, res) => {
   try {
-    // Fetch orders for the logged-in user
-    const userId = req.user.id; // Assuming `req.user` contains the authenticated user's info
-    const orders = await Order.find({ userId }).sort({ createdAt: -1 }); // Sort by most recent orders
+    const userId = req.user.id;
+    console.log("Fetching orders for user ID:", userId);
+
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+    console.log("Orders fetched:", orders);
 
     if (orders.length === 0) {
       return res.status(404).json({ message: "No orders found for this user." });
@@ -26,6 +28,7 @@ router.get("/user/orders", userauth, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch orders", details: error.message });
   }
 });
+
 
 
 
