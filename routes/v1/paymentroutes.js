@@ -85,6 +85,29 @@ router.post("/create-checkout-session", userauth, async (req, res) => {
     res.status(500).json({ error: "Failed to create checkout session", details: error.message });
   }
 });
+router.post("/store-order", userauth, async (req, res) => {
+  try {
+    const { products, totalPrice } = req.body;
+
+    if (!products || products.length === 0) {
+      return res.status(400).json({ error: "No products provided" });
+    }
+
+    const newOrder = new Order({
+      userId: req.user.id, // From the userauth middleware
+      products,
+      totalPrice,
+      paymentStatus: 'paid'
+    });
+
+    await newOrder.save();
+    res.status(201).json({ success: true, message: "Order created successfully", order: newOrder });
+
+  } catch (error) {
+    console.error("Error storing order:", error.message);
+    res.status(500).json({ error: "Failed to store order", details: error.message });
+  }
+});
 
 
 
