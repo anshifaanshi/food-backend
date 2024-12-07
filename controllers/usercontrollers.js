@@ -180,34 +180,45 @@ const userUpdate = async (req, res, next) => {
     const { email, password, name } = req.body;
 
     try {
+        // Check if the new email already exists in the database
+        if (email) {
+            const existingUser = await UserModel.findOne({ email });
+            if (existingUser) {
+                return res.status(400).json({ message: "Email ID already exists" });
+            }
+        }
+
         const updates = {};
-        
+
         if (email && email !== '') {
             updates.email = email;
         }
         if (password && password !== '') {
-            updates.password = password; // Make sure to hash the password before saving
+            updates.password = password; // Ensure to hash the password before saving
         }
         if (name && name !== '') {
             updates.name = name;
         }
-        
+
+        // Assuming you're finding the user by their current email or another unique identifier
         const updatedUser = await UserModel.findOneAndUpdate(
-            { email }, // Assuming you're finding by email, adjust if needed
+            { email }, // You may want to adjust this if you're updating based on a different field (e.g., user ID)
             { $set: updates },
             { new: true } // Return the updated document
         );
 
         if (!updatedUser) {
-            return res.status(404).json("User not found");
+            return res.status(404).json({ message: "User not found" });
         }
 
         res.status(200).json({ message: "User updated successfully", user: updatedUser });
+
     } catch (error) {
         console.error(error);
-        res.status(500).json("Internal server error");
+        res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 
 
