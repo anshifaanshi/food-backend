@@ -79,6 +79,17 @@ router.post("/create-checkout-session", userauth, async (req, res) => {
       },
     });
 
+
+    const newOrder = new Order({
+      userId: req.user.id,
+      products,
+      totalPrice: amountInCents / 100, // Convert to dollars
+      paymentStatus: 'pending' // You can update this later after Stripe payment success
+    });
+
+    await newOrder.save()
+
+
     res.json({ success: true, sessionId: session.id });
   } catch (error) {
     console.error("Error creating checkout session:", error.message);
