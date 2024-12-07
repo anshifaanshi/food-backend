@@ -174,13 +174,11 @@ const userauth = (req, res, next) => {
 };
 
 
-   
-
 const userUpdate = async (req, res, next) => {
     const { email, password, name } = req.body;
 
     try {
-        // Check if the new email already exists in the database
+        // Check if the new email already exists in the database, excluding the current user's email
         if (email) {
             const existingUser = await UserModel.findOne({ email });
             if (existingUser) {
@@ -190,19 +188,22 @@ const userUpdate = async (req, res, next) => {
 
         const updates = {};
 
+        // Check if the email is provided and update
         if (email && email !== '') {
             updates.email = email;
         }
+        // Check if password is provided and hash it before saving
         if (password && password !== '') {
-            updates.password = password; // Ensure to hash the password before saving
+            updates.password = password; // Make sure to hash the password before saving
         }
+        // Check if name is provided and update
         if (name && name !== '') {
             updates.name = name;
         }
 
-        // Assuming you're finding the user by their current email or another unique identifier
-        const updatedUser = await UserModel.findOneAndUpdate(
-            { email }, // You may want to adjust this if you're updating based on a different field (e.g., user ID)
+        // Here, we are assuming the user ID or another unique identifier to update their info
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            req.user.id, // Assuming you have the user ID in req.user.id from authentication middleware
             { $set: updates },
             { new: true } // Return the updated document
         );
