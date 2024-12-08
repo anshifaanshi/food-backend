@@ -37,7 +37,7 @@ const createFoodItem = async (req, res) => {
             name,
             description,
             price,
-            image: imagePath // Save the image path in the database
+            image// Save the image path in the database
         });
 
         await foodItem.save();
