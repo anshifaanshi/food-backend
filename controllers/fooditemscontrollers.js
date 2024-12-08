@@ -27,13 +27,27 @@ const getFoodItemById = async (req, res) => {
 
 const createFoodItem = async (req, res) => {
     try {
-        const foodItem = new FoodItem(req.body);
+        const { name, description, price } = req.body;
+        const imagePath = req.file ? req.file.path : null; // Get image path
+        if (!name || !description || !price || !imagePath) {
+            return res.status(400).json({ error: 'All fields are required including the image' });
+        }
+
+        const foodItem = new FoodItem({
+            name,
+            description,
+            price,
+            image: imagePath // Save the image path in the database
+        });
+
         await foodItem.save();
         res.status(201).json(foodItem);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
-};
+}
+
+
 
 
 const updateFoodItem = async (req, res) => {
