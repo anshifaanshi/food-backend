@@ -20,6 +20,7 @@ const fooditemsSchema = new mongoose.Schema({
     type: String, 
     required: [true, 'Image URL is required'] // 🛠️ Custom error message
   },
+  hotel: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true } ,
   availability: {
     type: Boolean,
     default: true

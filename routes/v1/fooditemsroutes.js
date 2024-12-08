@@ -1,6 +1,6 @@
 const express=require("express");
 const router=express.Router();
-const { getAllFoodItems, getFoodItemById, createFoodItem, updateFoodItem, deleteFoodItem, searchFoodItems } = require('../../controllers/fooditemscontrollers');
+const { getAllFoodItems, getFoodItemById, createFoodItem, updateFoodItem, deleteFoodItem, searchFoodItems,getFoodItemsByHotelId } = require('../../controllers/fooditemscontrollers');
 const { userauth } = require("../../controllers/usercontrollers");
 const{adminauth}=require("../../middlewares/adminauth")
 const {upload}=require("../../middlewares/multer.js")
@@ -22,6 +22,8 @@ router.delete('/delete:id',adminauth, deleteFoodItem);
 
 
 router.get('/search', searchFoodItems);
+// Route to get food items by hotelId
+router.get('/hotel/:hotelId', getFoodItemsByHotelId);
 
 
 
