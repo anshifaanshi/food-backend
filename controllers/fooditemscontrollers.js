@@ -27,17 +27,16 @@ const getFoodItemById = async (req, res) => {
 
 const createFoodItem = async (req, res) => {
     try {
-        const { name, description, price } = req.body;
-        const imagePath = req.file ? req.file.path : null; // Get image path
-        if (!name || !description || !price || !imagePath) {
-            return res.status(400).json({ error: 'All fields are required including the image' });
+        const { name, description, price,image} = req.body;
+        if (!name || !description || !price || !image) {
+            return res.status(400).json({ error: 'All fields are required, including the image URL.' });
         }
 
         const foodItem = new FoodItem({
             name,
             description,
             price,
-            image// Save the image path in the database
+            image, // Save image URL directly
         });
 
         await foodItem.save();
@@ -46,7 +45,6 @@ const createFoodItem = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 }
-
 
 
 
