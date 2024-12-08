@@ -1,6 +1,6 @@
 const { FoodItem } = require("../models/fooditemsmodels");
 const hotel=require('../models/hotelmodels')
-
+const mongoose = require('mongoose');
 const getAllFoodItems = async (req, res) => {
     try {
         const foodItems = await FoodItem.find();
