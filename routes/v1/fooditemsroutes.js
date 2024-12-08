@@ -3,16 +3,19 @@ const router=express.Router();
 const { getAllFoodItems, getFoodItemById, createFoodItem, updateFoodItem, deleteFoodItem, searchFoodItems } = require('../../controllers/fooditemscontrollers');
 const { userauth } = require("../../controllers/usercontrollers");
 const{adminauth}=require("../../middlewares/adminauth")
+const {upload}=require("../../middlewares/multer.js")
+
+
 router.get('/allfood', getAllFoodItems);
 
 
-router.get('/foodbyid:id', getFoodItemById);
+router.get('/foodbyid:id',upload.single("image"), getFoodItemById);
 
 
-router.post('/createfood', adminauth,createFoodItem);
+router.post('/createfood',upload.single("image"), adminauth,createFoodItem);
 
 
-router.put('/update:id', adminauth,updateFoodItem);
+router.put('/update:id', upload.single("image"),adminauth,updateFoodItem);
 
 
 router.delete('/delete:id',adminauth, deleteFoodItem);
