@@ -41,45 +41,49 @@ const getFoodItemsByHotelId = async (req, res) => {
 
 const createFoodItem = async (req, res) => {
     try {
-        const { name, description, price, image, hotelId } = req.body;
+        // Step 1: Validate the hotelId
+        const { hotelId, name, description, price } = req.body;
 
-        // Check for missing fields
-        if (!name || !description || !price || !image || !hotelId) {
-            return res.status(400).json({ error: 'All fields are required, including the image URL.' });
+        if (!hotelId || !mongoose.Types.ObjectId.isValid(hotelId)) {
+            return res.status(400).json({ error: 'Invalid hotel ID.' });
         }
 
-        // Validate hotelId
-        if (!mongoose.Types.ObjectId.isValid(hotelId)) {
-            return res.status(400).json({ error: 'Invalid hotel ID' });
+        if (!name || !description || !price) {
+            return res.status(400).json({ error: 'Name, description, and price are required.' });
         }
 
-        // Find the hotel
-        const hotelInstance = await Hotel.findById(hotelId);
-        if (!hotelInstance) {
-            return res.status(404).json({ error: 'Hotel not found' });
+        // Step 2: Check if the hotel exists
+        const existingHotel = await hotel.findById(hotelId);
+        if (!existingHotel) {
+            return res.status(404).json({ error: 'Hotel not found.' });
         }
 
-        // Create new FoodItem
-        const foodItem = new FoodItem({
+        // Step 3: Create a new FoodItem and associate it with the hotel
+        const newFoodItem = new FoodItem({
             name,
             description,
             price,
-            image,
-            hotel: hotelId // ✅ Referencing hotel ID correctly
+            hotel: hotelId // Link to the hotel by its ID
         });
 
-        // Add the food item to hotel's foodItems array
-        hotelInstance.foodItems.push(foodItem._id);
-        
-        // Save both the food item and the updated hotel
-        await foodItem.save();
-        await hotelInstance.save();
+        // Step 4: Save the new food item to the database
+        const savedFoodItem = await newFoodItem.save();
 
-        res.status(201).json(foodItem);
+        // Step 5: Update the hotel by adding the new food item to its fooditems array
+        existingHotel.fooditems.push(savedFoodItem._id);
+        await existingHotel.save();
+
+        res.status(201).json({
+            message: 'Food item created and associated with hotel successfully.',
+            foodItem: savedFoodItem,
+            hotel: existingHotel
+        });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error(error);
+        res.status(500).json({ error: 'Server error occurred. Please try again later.' });
     }
-}
+};
+
 
 
 const updateFoodItem = async (req, res) => {
