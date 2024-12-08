@@ -1,5 +1,5 @@
 const { FoodItem } = require("../models/fooditemsmodels");
-const Hotel=require('../models/hotelmodels')
+const hotel=require('../models/hotelmodels')
 
 const getAllFoodItems = async (req, res) => {
     try {
@@ -38,33 +38,48 @@ const getFoodItemsByHotelId = async (req, res) => {
     }
 };
 
+
 const createFoodItem = async (req, res) => {
     try {
-        const { name, description, price,image,hotelId} = req.body;
-        if (!name || !description || !price || !image||!hotelId) {
+        const { name, description, price, image, hotelId } = req.body;
+
+        // Check for missing fields
+        if (!name || !description || !price || !image || !hotelId) {
             return res.status(400).json({ error: 'All fields are required, including the image URL.' });
         }
 
+        // Validate hotelId
+        if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+            return res.status(400).json({ error: 'Invalid hotel ID' });
+        }
 
-        const hotel = await Hotel.findById(hotelId);
-    if (!hotel) {
-      return res.status(404).json({ error: 'Hotel not found' });
-    }
+        // Find the hotel
+        const hotelInstance = await Hotel.findById(hotelId);
+        if (!hotelInstance) {
+            return res.status(404).json({ error: 'Hotel not found' });
+        }
+
+        // Create new FoodItem
         const foodItem = new FoodItem({
             name,
             description,
             price,
             image,
-            hotel: hotelId // Save image URL directly
+            hotel: hotelId // ✅ Referencing hotel ID correctly
         });
-        hotel.foodItems.push(foodItem._id)
+
+        // Add the food item to hotel's foodItems array
+        hotelInstance.foodItems.push(foodItem._id);
+        
+        // Save both the food item and the updated hotel
         await foodItem.save();
+        await hotelInstance.save();
+
         res.status(201).json(foodItem);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 }
-
 
 
 const updateFoodItem = async (req, res) => {
