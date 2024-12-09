@@ -12,4 +12,14 @@ router.get('/hotelprofile/:id',gethotelbyid)
 
 router.post('/update:id',upload.single("image"),adminauth,updatehotels)
 
+
+router.put('/:hotelId', async (req, res) => {
+    try {
+      const updatedHotel = await Hotel.findByIdAndUpdate(req.params.hotelId, req.body, { new: true });
+      res.json(updatedHotel);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to update hotel.' });
+    }
+  });
+
 module.exports={hotelrouters:router}

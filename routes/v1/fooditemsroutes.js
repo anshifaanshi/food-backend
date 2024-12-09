@@ -25,7 +25,15 @@ router.get('/search', searchFoodItems);
 // Route to get food items by hotelId
 router.get('/hotel/:hotelId', getFoodItemsByHotelId);
 
-
+router.put('/:menuId', async (req, res) => {
+    try {
+      const updatedMenu = await Menu.findByIdAndUpdate(req.params.menuId, req.body, { new: true });
+      res.json(updatedMenu);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to update menu item.' });
+    }
+  });
+  
 
 
 
