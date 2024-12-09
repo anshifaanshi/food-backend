@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { hotel } = require('../models/hotelmodels'); // Destructure to get hotel model
 
 const fooditemsSchema = new mongoose.Schema({
   name: {
