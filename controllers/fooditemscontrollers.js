@@ -54,6 +54,10 @@ const createFoodItem = async (req, res) => {
             return res.status(400).json({ error: 'Name, description, price, and image URL are required.' });
         }
 
+        if (typeof price !== 'number' || price <= 0) {
+            return res.status(400).json({ error: 'Price must be a positive number.' });
+        }
+
         // Step 2: Check if the hotel exists
         console.log(`Checking if hotel with ID ${hotelId} exists...`);
         const existingHotel = await hotel.findById(hotelId);
@@ -67,27 +71,24 @@ const createFoodItem = async (req, res) => {
             name,
             description,
             price,
-            image, // Include the image URL in the food item
-            hotel: hotelId // Link to the hotel by its ID
+            image, 
+            hotel: hotelId 
         });
 
         console.log('Saving new food item...');
-        // Step 4: Save the new food item to the database
         const savedFoodItem = await newFoodItem.save();
 
-        // Step 5: Update the hotel by adding the new food item to its fooditems array
         console.log(`Adding food item ${savedFoodItem._id} to the hotel...`);
         existingHotel.fooditems.push(savedFoodItem._id);
         await existingHotel.save();
 
-        // Step 6: Respond with the created food item and the updated hotel
         res.status(201).json({
             message: 'Food item created and associated with hotel successfully.',
             foodItem: savedFoodItem,
             hotel: existingHotel
         });
     } catch (error) {
-        console.error('Error occurred:', error); // Log the error for debugging
+        console.error('Error details:', error.message, error.stack); // Log detailed error info
         res.status(500).json({ error: 'Server error occurred. Please try again later.' });
     }
 };
