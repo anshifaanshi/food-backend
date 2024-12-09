@@ -54,9 +54,7 @@ const createFoodItem = async (req, res) => {
             return res.status(400).json({ error: 'Name, description, price, and image URL are required.' });
         }
 
-        if (typeof price !== 'number' || price <= 0) {
-            return res.status(400).json({ error: 'Price must be a positive number.' });
-        }
+       
 
         // Step 2: Check if the hotel exists
         console.log(`Checking if hotel with ID ${hotelId} exists...`);
