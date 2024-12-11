@@ -122,8 +122,11 @@ const updatehotels = async (req, res, next) => {
           return res.status(400).json({ error: 'Hotel name already exists' });
       }
 
+      // Prepare the updated hotel data, excluding image
+      const updatedData = { ...req.body };
+      
       // Proceed with updating the hotel if no name conflict is found
-      const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, {
+      const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, updatedData, {
           new: true, // Return the updated document
           runValidators: true, // Ensure schema validations are enforced
       }).populate('fooditems');
@@ -136,7 +139,8 @@ const updatehotels = async (req, res, next) => {
   } catch (error) {
       res.status(400).json({ error: error.message });
   }
-}
+};
+
 
 
 
