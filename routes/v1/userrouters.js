@@ -3,7 +3,7 @@
 
 const express = require("express");
 const {usersignup, userlogin, userlogout, userProfile, userauth, checkuser, userUpdate } = require('../../controllers/usercontrollers');
-
+const {user} =require('../../models/usermodels')
 
 const router = express.Router();
 
@@ -26,4 +26,15 @@ router.delete('/delete', (req, res) => {
 
 router.get('/checkuser', userauth, checkuser);
 router.put('/edit',userauth,userUpdate)
+
+
+
+router.get('/users', async (req, res) => {
+    try {
+      const users = await user.find(); // Fetch all users from MongoDB
+      res.status(200).json(users); // Send the users as JSON response
+    } catch (error) {
+      res.status(500).json({ message: 'Error retrieving users', error });
+    }
+  });
 module.exports = { userrouters: router };
