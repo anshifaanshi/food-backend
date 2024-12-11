@@ -10,7 +10,7 @@ router.post('/createhotel',upload.single("image"),adminauth,createhotel)
 router.get('/hotels',getallhotels)
 router.get('/hotelprofile/:id',gethotelbyid)
 
-router.post('/update/:id',adminauth,updatehotels)
+router.put('/update/:id',adminauth,updatehotels)
 
 
 router.put('/:id', async (req, res) => {
