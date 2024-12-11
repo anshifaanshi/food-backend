@@ -1,6 +1,6 @@
 const mongoose = require('mongoose'); 
 const { cloudinaryInstane } = require('../config.js/cloudinaryconfig');
-const { hotel } = require('../models/hotelmodels');
+const  hotel  = require('../models/hotelmodels');
 const { handleimageupload } = require('../utils/imageupload');
 
 
@@ -110,22 +110,34 @@ const gethotelbyid = async (req, res) => {
     }
 };
 
-const updatehotels=async(req,res,next)=>{
-    try {
-        const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true,
-        }).populate('fooditems');
-        if (!updatedHotel) {
-            return res.status(404).json({ error: 'Hotel not found' });
-        }
+const updatehotels = async (req, res, next) => {
+  try {
+      // Extract the hotel name from the request body
+      const { name } = req.body;
       
-        
-        res.status(200).json(updatedHotel);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+      // Check if the hotel name already exists (exclude the current hotel from the check)
+      const existingHotel = await hotel.findOne({ name: name, _id: { $ne: req.params.id } });
+      
+      if (existingHotel) {
+          return res.status(400).json({ error: 'Hotel name already exists' });
+      }
+
+      // Proceed with updating the hotel if no name conflict is found
+      const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, {
+          new: true, // Return the updated document
+          runValidators: true, // Ensure schema validations are enforced
+      }).populate('fooditems');
+      
+      if (!updatedHotel) {
+          return res.status(404).json({ error: 'Hotel not found' });
+      }
+      
+      res.status(200).json(updatedHotel);
+  } catch (error) {
+      res.status(400).json({ error: error.message });
+  }
 }
+
 
 
 const deletehotel=async (req,res)=>{
