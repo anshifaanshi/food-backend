@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { cloudinaryInstane } = require('../config.js/cloudinaryconfig');
 const  hotel  = require('../models/hotelmodels');
 const { handleimageupload } = require('../utils/imageupload');
-
+const FoodItem= require ('../models/fooditemsmodels')
 
 
 const createhotel = async (req, res) => {
