@@ -4,7 +4,7 @@ const { getAllFoodItems, getFoodItemById, createFoodItem, updateFoodItem, delete
 const { userauth } = require("../../controllers/usercontrollers");
 const{adminauth}=require("../../middlewares/adminauth")
 const {upload}=require("../../middlewares/multer.js")
-
+const hotel=require("../../models/hotelmodels.js")
 
 router.get('/allfood', getAllFoodItems);
 
@@ -28,7 +28,7 @@ router.get('/hotel/:hotelId', getFoodItemsByHotelId);
 
 router.put('/:id', async (req, res) => {
   try {
-    const updatedHotel = await Hotel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(updatedHotel);
   } catch (err) {
     res.status(500).json({ error: err.message });
