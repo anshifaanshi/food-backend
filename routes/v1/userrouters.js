@@ -20,14 +20,11 @@ router.get('/profile', userauth, userProfile);
 
 
 
-router.delete('/delete', (req, res) => {
-    res.send("User delete route");
-});
 
 router.get('/checkuser', userauth, checkuser);
 router.put('/edit',userauth,userUpdate)
 router.get('/users',UsersCollections)
-router.delete('/users/:id',DeleteUser)
+router.delete('/delete/:id',DeleteUser)
 
 
 module.exports = { userrouters: router };
