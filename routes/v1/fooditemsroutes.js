@@ -15,7 +15,7 @@ router.get('/foodbyid:id',upload.single("image"), getFoodItemById);
 router.post('/createfood', adminauth,createFoodItem);
 
 
-router.put('/update:id', upload.single("image"),adminauth,updateFoodItem);
+router.put('/update/:id' ,adminauth,updateFoodItem);
 
 
 router.delete('/delete:id',adminauth, deleteFoodItem);
