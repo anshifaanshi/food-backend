@@ -1,5 +1,5 @@
 const { FoodItem } = require("../models/fooditemsmodels");
-const { hotel } = require('../models/hotelmodels'); // Destructure to get hotel model
+const  hotel  = require('../models/hotelmodels'); // Destructure to get hotel model
 
 const mongoose = require('mongoose');
 const getAllFoodItems = async (req, res) => {
