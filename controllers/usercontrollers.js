@@ -220,7 +220,14 @@ const userUpdate = async (req, res, next) => {
     }
 };
 
+const UsersCollections = async (req, res) => {
+    try {
+      const users = await UserModel.find();  // Fetch users from the database
+      res.status(200).json(users);  // Send users as JSON
+    } catch (err) {
+      res.status(500).json({ error: 'Unable to fetch users' });
+    }
+  };
 
 
-
-module.exports = { usersignup, userlogin, userlogout, userProfile, userauth, checkuser ,userUpdate};
+module.exports = { usersignup, userlogin, userlogout, userProfile, userauth, checkuser ,userUpdate, UsersCollections};
