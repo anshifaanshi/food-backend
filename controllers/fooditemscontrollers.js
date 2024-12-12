@@ -91,8 +91,6 @@ const createFoodItem = async (req, res) => {
 
 
 
-const mongoose = require('mongoose');
-const { FoodItem } = require('../models/fooditems'); // Correct model import
 
 const updateFoodItem = async (req, res) => {
   try {
