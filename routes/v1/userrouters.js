@@ -27,7 +27,7 @@ router.delete('/delete', (req, res) => {
 router.get('/checkuser', userauth, checkuser);
 router.put('/edit',userauth,userUpdate)
 router.get('/users',UsersCollections)
-router.get('/users/:id',DeleteUser)
+router.delete('/users/:id',DeleteUser)
 
 
 module.exports = { userrouters: router };
