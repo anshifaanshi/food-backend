@@ -2,7 +2,7 @@
 
 
 const express = require("express");
-const {usersignup, userlogin, userlogout, userProfile, userauth, checkuser, userUpdate,UsersCollections } = require('../../controllers/usercontrollers');
+const {usersignup, userlogin, userlogout, userProfile, userauth, checkuser, userUpdate,UsersCollections ,DeleteUser} = require('../../controllers/usercontrollers');
 const {user} =require('../../models/usermodels')
 
 const router = express.Router();
@@ -27,7 +27,7 @@ router.delete('/delete', (req, res) => {
 router.get('/checkuser', userauth, checkuser);
 router.put('/edit',userauth,userUpdate)
 router.get('/users',UsersCollections)
-
+router.get('/users/:id',DeleteUser)
 
 
 module.exports = { userrouters: router };
