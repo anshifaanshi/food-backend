@@ -231,7 +231,7 @@ const UsersCollections = async (req, res) => {
 const DeleteUser =async(req, res) => {
     const { id } = req.params;
     try {
-      const user = await User.findByIdAndDelete(id);
+      const user = await UserModel.findByIdAndDelete(id);
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
