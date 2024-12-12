@@ -26,21 +26,21 @@ router.get('/search', searchFoodItems);
 router.get('/hotel/:hotelId', getFoodItemsByHotelId);
 
 
-router.put('/:id', async (req, res) => {
-  try {
-    console.log('ID:', req.params.id); // Log the ID
-    console.log('Request Body:', req.body); // Log the body to debug
 
-    const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, {
-      new: true, 
-      runValidators: true 
-    });
+router.put('/:id', async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ error: 'Invalid ID format' });
+  }
+  try {
+    const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!updatedHotel) {
+      return res.status(404).json({ error: 'Food item not found' });
+    }
     res.json(updatedHotel);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 
 
