@@ -28,7 +28,13 @@ router.get('/hotel/:hotelId', getFoodItemsByHotelId);
 
 router.put('/:id', async (req, res) => {
   try {
-    const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    console.log('ID:', req.params.id); // Log the ID
+    console.log('Request Body:', req.body); // Log the body to debug
+
+    const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, {
+      new: true, 
+      runValidators: true 
+    });
     res.json(updatedHotel);
   } catch (err) {
     res.status(500).json({ error: err.message });
