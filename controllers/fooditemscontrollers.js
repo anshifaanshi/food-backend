@@ -91,22 +91,37 @@ const createFoodItem = async (req, res) => {
 
 
 
-const updateFoodItem = async (req, res) => {
-    try {
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ error: 'Invalid ID format' });
-        }
+const mongoose = require('mongoose');
+const { FoodItem } = require('../models/fooditems'); // Correct model import
 
-        const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-        if (!updatedHotel) {
-            return res.status(404).json({ error: 'Food item not found' });
-        }
-        
-        res.json(updatedHotel);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+const updateFoodItem = async (req, res) => {
+  try {
+    // 🛠️ Check if ID is valid
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid ID format' });
     }
+
+    // 🛠️ Update food item, ensuring that hotel is not required in the request body
+    const updatedFoodItem = await FoodItem.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    
+    if (!updatedFoodItem) {
+      return res.status(404).json({ error: 'Food item not found' });
+    }
+
+    res.status(200).json(updatedFoodItem); // Send the updated food item back
+  } catch (err) {
+    // 🛠️ Handle validation or other errors
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
+
 
 const deleteFoodItem = async (req, res) => {
     try {
