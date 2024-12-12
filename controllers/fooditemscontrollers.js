@@ -93,40 +93,20 @@ const createFoodItem = async (req, res) => {
 
 const updateFoodItem = async (req, res) => {
     try {
-        // 1. Validate the ID
-        const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ error: 'Invalid ID format' });
         }
 
-        // 2. Update the Food Item
-        const updatedFoodItem = await hotel.findByIdAndUpdate(
-            id, 
-            req.body, 
-            { 
-                new: true,             // Return the updated document
-                runValidators: true    // Run Mongoose validators on the update
-            }
-        );
-
-        // 3. Check if the food item exists
-        if (!updatedFoodItem) {
+        const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!updatedHotel) {
             return res.status(404).json({ error: 'Food item not found' });
         }
-
-        // 4. Send the updated food item as a response
-        res.status(200).json(updatedFoodItem);
-
-    } catch (error) {
-        // 5. Log the full error for debugging purposes
-        console.error('Error updating food item:', error);
-
-        // 6. Return a server error to the client
-        res.status(500).json({ error: 'Internal Server Error' });
+        
+        res.json(updatedHotel);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 };
-
-
 
 const deleteFoodItem = async (req, res) => {
     try {
