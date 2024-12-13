@@ -30,7 +30,11 @@ const userschema=new mongoose.Schema({
     hotels:[{
 type:mongoose.Schema.Types.ObjectId,
 ref:"hotels",
-    }]
+    }],
+    isBlocked: {
+        type: Boolean,
+        default: false // New field with default value
+    }
    
 })
 const user=mongoose.model('user',userschema)
