@@ -173,14 +173,13 @@ const userauth = (req, res, next) => {
     }
 };
 
-
 const userUpdate = async (req, res, next) => {
     const { email, password, name } = req.body;
 
     try {
         // Check if the new email already exists in the database, excluding the current user's email
         if (email) {
-            const existingUser = await UserModel.findOne({ email });
+            const existingUser = await UserModel.findOne({ email, _id: { $ne: req.user.id } }); 
             if (existingUser) {
                 return res.status(400).json({ message: "Email ID already exists" });
             }
@@ -194,7 +193,8 @@ const userUpdate = async (req, res, next) => {
         }
         // Check if password is provided and hash it before saving
         if (password && password !== '') {
-            updates.password = password; // Make sure to hash the password before saving
+            // Ideally, hash the password here before saving
+            updates.password = password; 
         }
         // Check if name is provided and update
         if (name && name !== '') {
@@ -219,6 +219,7 @@ const userUpdate = async (req, res, next) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 const UsersCollections = async (req, res) => {
     try {
