@@ -268,4 +268,4 @@ const DeleteUser =async(req, res) => {
   
   module.exports = { toggleBlockUser };
   
-module.exports = { usersignup, userlogin, userlogout, userProfile, userauth, checkuser ,userUpdate, UsersCollections,DeleteUser};
+module.exports = { usersignup, userlogin, userlogout, userProfile, userauth, checkuser ,userUpdate, UsersCollections,DeleteUser,toggleBlockUser};
