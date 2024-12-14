@@ -243,29 +243,33 @@ const DeleteUser =async(req, res) => {
     }
   };
   
+ 
+  
+
   const toggleBlockUser = async (req, res) => {
-    const { userId } = req.params;
-
+    const { id } = req.params; // Fetch the userId from the URL params
+  
     try {
-        const user = await UserModel.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        // Toggle the 'blocked' status
-        user.blocked = !user.blocked;
-        await user.save();
-
-        // Return 'isBlocked' instead of 'blocked'
-        res.status(200).json({ 
-            message: `User has been ${user.blocked ? 'blocked' : 'unblocked'} successfully`, 
-            isBlocked: user.blocked // Return isBlocked field
-        });
+      const user = await UserModel.findById(id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Toggle the 'blocked' status
+      user.blocked = !user.blocked;
+      await user.save();
+  
+      // Return 'isBlocked' instead of 'blocked'
+      res.status(200).json({
+        message: `User has been ${user.blocked ? 'blocked' : 'unblocked'} successfully`,
+        isBlocked: user.blocked, // Return isBlocked field
+      });
     } catch (error) {
-        console.error('Error toggling block status:', error);
-        res.status(500).json({ message: 'Internal server error' });
+      console.error('Error toggling block status:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
-};
+  };
+  
 
   
   
