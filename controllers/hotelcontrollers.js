@@ -114,49 +114,48 @@ const gethotelbyid = async (req, res) => {
 
 
 const updatehotels = async (req, res, next) => {
-  try {
-      // ✅ Step 1: Validate the hotel ID
-      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-          return res.status(400).json({ error: 'Invalid hotel ID' });
-      }
+    const { name, address, phone, description } = req.body; // Extract only the necessary fields
 
-      // ✅ Step 2: Extract the data from request body
-      const { name } = req.body;
-      
-      // ✅ Step 3: Only check for duplicate name if 'name' is provided in the request
-      if (name) {
-          const existingHotel = await hotel.findOne({ 
-              name: { $regex: new RegExp('^' + name + '$', 'i') }, // Match name, case-insensitive
-              _id: { $ne: mongoose.Types.ObjectId(req.params.id) } // Exclude current hotel
-          });
+    try {
+        // ✅ Step 1: Check if the new hotel name already exists, excluding the current hotel's name
+        if (name) {
+            const existingHotel = await hotel.findOne({ 
+                name, 
+                _id: { $ne: req.params.id } // Exclude current hotel ID 
+            }); 
+            if (existingHotel) {
+                return res.status(400).json({ message: "Hotel name already exists" });
+            }
+        }
 
-          if (existingHotel) {
-              console.log('❌ Hotel name already exists:', existingHotel);
-              return res.status(400).json({ error: 'Hotel name already exists' });
-          }
-      }
+        // ✅ Step 2: Prepare updates dynamically, only update provided fields
+        const updates = {};
+        if (name && name !== '') updates.name = name;
+        if (address && address !== '') updates.address = address;
+        if (phone && phone !== '') updates.phone = phone;
+        if (description && description !== '') updates.description = description;
 
-      // ✅ Step 4: Prepare the updated hotel data
-      const updatedData = { ...req.body };
+        // ✅ Step 3: Update the hotel document
+        const updatedHotel = await hotel.findByIdAndUpdate(
+            req.params.id, // Assuming hotel ID is in req.params.id
+            { $set: updates }, // Update only the provided fields
+            { new: true, runValidators: true } // Return the updated hotel
+        );
 
-      // ✅ Step 5: Update the hotel and populate related food items
-      const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, updatedData, {
-          new: true, // Return the updated document
-          runValidators: true, // Enforce schema validations
-      }).populate('fooditems');
-      
-      if (!updatedHotel) {
-          console.log('❌ Hotel not found for update');
-          return res.status(404).json({ error: 'Hotel not found' });
-      }
+        // ✅ Step 4: Check if the hotel exists
+        if (!updatedHotel) {
+            return res.status(404).json({ message: "Hotel not found" });
+        }
 
-      // ✅ Step 6: Respond with the updated hotel data
-      res.status(200).json(updatedHotel);
-  } catch (error) {
-      console.error('❌ Error updating hotel:', error);
-      res.status(500).json({ error: 'An unexpected error occurred' });
-  }
+        // ✅ Step 5: Send the updated hotel as a response
+        res.status(200).json({ message: "Hotel updated successfully", hotel: updatedHotel });
+
+    } catch (error) {
+        console.error('❌ Error updating hotel:', error);
+        res.status(500).json({ message: "Internal server error" });
+    }
 };
+
 
 
 
