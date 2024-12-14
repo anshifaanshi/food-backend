@@ -245,9 +245,13 @@ const DeleteUser =async(req, res) => {
   
  
   
-
   const toggleBlockUser = async (req, res) => {
-    const { id } = req.params; // Corrected to extract 'id' instead of 'userId'
+    const { id } = req.params;
+  
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
   
     try {
       const user = await UserModel.findById(id);
@@ -264,10 +268,12 @@ const DeleteUser =async(req, res) => {
         isBlocked: user.blocked,
       });
     } catch (error) {
-      console.error('Error toggling block status:', error); 
+      console.error('Error toggling block status:', error);
       res.status(500).json({ message: 'Internal server error', error: error.message });
     }
   };
+  
+  
   
   
   
