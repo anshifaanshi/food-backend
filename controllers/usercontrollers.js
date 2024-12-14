@@ -242,30 +242,32 @@ const DeleteUser =async(req, res) => {
       res.status(500).json({ message: 'Failed to delete user' });
     }
   };
+  
   const toggleBlockUser = async (req, res) => {
-     const { userId } = req.params;
-  
-     try {
-          // Find the user and toggle the 'blocked' status
-         const user = await UserModel.findById(userId);
-          if (!user) {
-              return res.status(404).json({ message: "User not found" });
-          }
-  
-          
-          user.blocked = !user.blocked;
-          await user.save();
-  
-          res.status(200).json({ 
-              message: `User has been ${user.blocked ? 'blocked' : 'unblocked'} successfully`, 
-             blocked: user.blocked 
-          });
+    const { userId } = req.params;
+
+    try {
+        const user = await UserModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Toggle the 'blocked' status
+        user.blocked = !user.blocked;
+        await user.save();
+
+        // Return 'isBlocked' instead of 'blocked'
+        res.status(200).json({ 
+            message: `User has been ${user.blocked ? 'blocked' : 'unblocked'} successfully`, 
+            isBlocked: user.blocked // Return isBlocked field
+        });
     } catch (error) {
-          console.error('Error toggling block status:', error);
-          res.status(500).json({ message: 'Internal server error' });
-      }
-  };
+        console.error('Error toggling block status:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
   
-  module.exports = { toggleBlockUser };
+  
   
 module.exports = { usersignup, userlogin, userlogout, userProfile, userauth, checkuser ,userUpdate, UsersCollections,DeleteUser,toggleBlockUser};
