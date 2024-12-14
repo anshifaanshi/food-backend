@@ -110,7 +110,7 @@ const gethotelbyid = async (req, res) => {
     }
 };
 
-const mongoose = require('mongoose');
+
 
 const updatehotels = async (req, res, next) => {
   try {
