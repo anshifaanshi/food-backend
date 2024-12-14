@@ -25,18 +25,20 @@ const allowedOrigins = [
      'https://food-frontend-2xctjic6w-anshifaanshis-projects.vercel.app'
 ];
 
-app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true); // Allow the request
-        } else {
-            console.error(`Blocked by CORS: ${origin}`);
-            callback(new Error('Request blocked by CORS policy.'));
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS','PATCH']
-}));
+
+
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', allowedOrigins.includes(req.headers.origin) ? req.headers.origin : '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200); // Allow preflight requests
+    }
+    next();
+});
+
 
 // Handle pre-flight requests
 app.options('*', (req, res) => {
