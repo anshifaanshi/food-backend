@@ -25,6 +25,6 @@ router.get('/checkuser', userauth, checkuser);
 router.put('/edit',userauth,userUpdate)
 router.get('/users',UsersCollections)
 router.delete('/delete/:id',DeleteUser)
-router.put ('/block/:id',toggleBlockUser)
+router.patch ('/block/:id',toggleBlockUser)
 
 module.exports = { userrouters: router };
