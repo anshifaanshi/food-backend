@@ -112,6 +112,7 @@ const gethotelbyid = async (req, res) => {
 
 
 
+
 const updatehotels = async (req, res, next) => {
   try {
       // ✅ Step 1: Validate the hotel ID
@@ -119,23 +120,25 @@ const updatehotels = async (req, res, next) => {
           return res.status(400).json({ error: 'Invalid hotel ID' });
       }
 
-      // ✅ Step 2: Extract the hotel name from the request body
+      // ✅ Step 2: Extract the data from request body
       const { name } = req.body;
       
-      // ✅ Step 3: Check if the hotel name already exists (case-insensitive)
-      const existingHotel = await hotel.findOne({ 
-          name: { $regex: new RegExp('^' + name + '$', 'i') }, 
-          _id: { $ne: req.params.id } 
-      });
+      // ✅ Step 3: Only check for duplicate name if 'name' is provided in the request
+      if (name) {
+          const existingHotel = await hotel.findOne({ 
+              name: { $regex: new RegExp('^' + name + '$', 'i') }, // Match name, case-insensitive
+              _id: { $ne: mongoose.Types.ObjectId(req.params.id) } // Exclude current hotel
+          });
 
-      if (existingHotel) {
-          console.log('❌ Hotel name already exists:', existingHotel);
-          return res.status(400).json({ error: 'Hotel name already exists' });
+          if (existingHotel) {
+              console.log('❌ Hotel name already exists:', existingHotel);
+              return res.status(400).json({ error: 'Hotel name already exists' });
+          }
       }
 
       // ✅ Step 4: Prepare the updated hotel data
       const updatedData = { ...req.body };
-      
+
       // ✅ Step 5: Update the hotel and populate related food items
       const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, updatedData, {
           new: true, // Return the updated document
@@ -154,6 +157,8 @@ const updatehotels = async (req, res, next) => {
       res.status(500).json({ error: 'An unexpected error occurred' });
   }
 };
+
+
 
 
 
