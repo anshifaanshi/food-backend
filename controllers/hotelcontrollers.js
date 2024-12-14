@@ -110,37 +110,50 @@ const gethotelbyid = async (req, res) => {
     }
 };
 
+const mongoose = require('mongoose');
+
 const updatehotels = async (req, res, next) => {
   try {
-      // Extract the hotel name from the request body
+      // ✅ Step 1: Validate the hotel ID
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+          return res.status(400).json({ error: 'Invalid hotel ID' });
+      }
+
+      // ✅ Step 2: Extract the hotel name from the request body
       const { name } = req.body;
       
-      // Check if the hotel name already exists (exclude the current hotel from the check)
-      const existingHotel = await hotel.findOne({ name: name, _id: { $ne: req.params.id } });
-      
+      // ✅ Step 3: Check if the hotel name already exists (case-insensitive)
+      const existingHotel = await hotel.findOne({ 
+          name: { $regex: new RegExp('^' + name + '$', 'i') }, 
+          _id: { $ne: req.params.id } 
+      });
+
       if (existingHotel) {
+          console.log('❌ Hotel name already exists:', existingHotel);
           return res.status(400).json({ error: 'Hotel name already exists' });
       }
 
-      // Prepare the updated hotel data, excluding image
+      // ✅ Step 4: Prepare the updated hotel data
       const updatedData = { ...req.body };
       
-      // Proceed with updating the hotel if no name conflict is found
+      // ✅ Step 5: Update the hotel and populate related food items
       const updatedHotel = await hotel.findByIdAndUpdate(req.params.id, updatedData, {
           new: true, // Return the updated document
-          runValidators: true, // Ensure schema validations are enforced
+          runValidators: true, // Enforce schema validations
       }).populate('fooditems');
       
       if (!updatedHotel) {
+          console.log('❌ Hotel not found for update');
           return res.status(404).json({ error: 'Hotel not found' });
       }
-      
+
+      // ✅ Step 6: Respond with the updated hotel data
       res.status(200).json(updatedHotel);
   } catch (error) {
-      res.status(400).json({ error: error.message });
+      console.error('❌ Error updating hotel:', error);
+      res.status(500).json({ error: 'An unexpected error occurred' });
   }
 };
-
 
 
 
