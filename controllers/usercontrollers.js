@@ -69,27 +69,28 @@ const userlogin = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "User does not exist" });
         }
 
-     //   if (userexist.blocked) {
-      //      return res.status(403).json({ success: false, message: "User is blocked. Please contact support." });
-       // }
-
-
         const passwordmatch = await bcrypt.compare(password, userexist.password);
         if (!passwordmatch) {
-            return res.status(401).json({ message: "User not authorized" });
+            return res.status(401).json({ success: false, message: "Invalid email or password" });
         }
 
         const token = generatetoken(userexist._id);
 
         // Set cookie correctly
         res.cookie("token", token, {
-            sameSite: "None", // Required for cross-site cookies in production
-            secure: true,     // Ensure secure transmission over HTTPS
-            httpOnly: true,   // Helps prevent JavaScript access on the client
+            sameSite: "None", 
+            secure: true,     
+            httpOnly: true,   
         });
-        
 
-        return res.status(200).json({ success: true, message: "User logged in successfully", user: userexist });
+        return res.status(200).json({ 
+            success: true, 
+            message: "User logged in successfully", 
+            user: { 
+                _id: userexist._id, 
+                email: userexist.email 
+            } 
+        });
 
     } catch (error) {
         console.error(error);
