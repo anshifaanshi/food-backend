@@ -256,14 +256,13 @@ const DeleteUser =async(req, res) => {
             return res.status(400).json({ message: 'Invalid User ID' });
         }
 
-        // Find the user and toggle the 'blocked' status
         const user = await UserModel.findById(id);
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Toggle blocked status
+        // Toggle the blocked status
         user.blocked = !user.blocked;
 
         // Save the updated user
@@ -273,10 +272,21 @@ const DeleteUser =async(req, res) => {
 
         res.status(200).json({ message: `User ${user.blocked ? 'blocked' : 'unblocked'} successfully`, user });
     } catch (error) {
-        console.error('Error blocking user:', error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error blocking/unblocking user:', error);
+        
+        // Provide more detailed error feedback
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Validation Error: ' + error.message });
+        }
+
+        if (error instanceof mongoose.Error) {
+            return res.status(500).json({ message: 'Database Error: ' + error.message });
+        }
+
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
 
 
 
