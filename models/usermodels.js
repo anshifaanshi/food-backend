@@ -31,7 +31,7 @@ const userschema=new mongoose.Schema({
 type:mongoose.Schema.Types.ObjectId,
 ref:"hotels",
     }],
-    Blocked: {
+    blocked: {
         type: Boolean,
         default: false // New field with default value
     }

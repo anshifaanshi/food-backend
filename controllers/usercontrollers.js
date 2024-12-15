@@ -275,7 +275,7 @@ const BlockUser = async (req, res) => {
     }
 };
 
-module.exports = BlockUser;
+
 
   
   
