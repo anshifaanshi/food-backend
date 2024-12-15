@@ -68,7 +68,10 @@ const userlogin = async (req, res, next) => {
         if (!userexist) {
             return res.status(404).json({ success: false, message: "User does not exist" });
         }
-
+        if (userexist.blocked) {
+                return res.status(403).json({ success: false, message: "User is blocked. Please contact support." });
+             }
+        
         const passwordmatch = await bcrypt.compare(password, userexist.password);
         if (!passwordmatch) {
             return res.status(401).json({ success: false, message: "Invalid email or password" });
