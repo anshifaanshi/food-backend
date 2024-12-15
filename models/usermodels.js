@@ -12,13 +12,7 @@ const userschema=new mongoose.Schema({
     password: {
         type: String,
         required: true,
-        validate: {
-            validator: function(v) {
-                // Updated regex: at least 6 characters, containing one letter, one number, and one special character
-                return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{6,}$/.test(v);
-            },
-            message: props => `${props.value} is not a strong password! It must contain at least one letter, one number, and one special character.`
-        }
+       
     },
     
 
