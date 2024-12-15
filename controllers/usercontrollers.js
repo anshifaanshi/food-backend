@@ -245,37 +245,38 @@ const DeleteUser =async(req, res) => {
   
  
   
-  const toggleBlockUser = async (req, res) => {
-    const { id } = req.params;
-  
-    // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Invalid user ID' });
-    }
-  
+  const BlockUser=async (req, res) => {
     try {
-      const user = await UserModel.findById(id);
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-  
-      // Toggle the 'blocked' status
-      user.blocked = !user.blocked;
-      await user.save();
-  
-      res.status(200).json({
-        message: `User has been ${user.blocked ? 'blocked' : 'unblocked'} successfully`,
-        isBlocked: user.blocked,
-      });
+        const { id } = req.params;
+        const user = await UserModel.findByIdAndUpdate(id, { blocked: true }, { new: true });
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        res.status(200).json({ message: 'User blocked successfully', user });
     } catch (error) {
-      console.error('Error toggling block status:', error);
-      res.status(500).json({ message: 'Internal server error', error: error.message });
+        console.error('Error blocking user:', error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-  };
+};
   
   
+  const UnblockUser=async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findByIdAndUpdate(id, { blocked: false }, { new: true });
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        res.status(200).json({ message: 'User unblocked successfully', user });
+    } catch (error) {
+        console.error('Error unblocking user:', error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
   
-  
-  
-  
-module.exports = { usersignup, userlogin, userlogout, userProfile, userauth, checkuser ,userUpdate, UsersCollections,DeleteUser,toggleBlockUser};
+module.exports = { usersignup, userlogin, userlogout, userProfile, userauth, checkuser ,userUpdate, UsersCollections,DeleteUser,BlockUser,UnblockUser};
