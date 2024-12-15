@@ -1,8 +1,10 @@
+const mongoose = require('mongoose');
 const { user: UserModel } = require('../models/usermodels.js'); 
 const bcrypt = require('bcrypt');
 const { generatetoken } = require('../utils/token.js');
 const jwt = require("jsonwebtoken");
 const dotenv = require('dotenv');
+
 dotenv.config();
 
 
