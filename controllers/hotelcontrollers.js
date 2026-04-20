@@ -9,12 +9,7 @@ const createhotel = async (req, res) => {
   try {
     console.log("Create hotel route hit");
     console.log(req.file ,'====== image in controller')
-    const userId = req.user; // Assuming userId is obtained from the request
-
-    // Ensure userId is a valid ObjectId
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ success: false, message: 'Invalid user ID format.' });
-    }
+    
 
     // Destructure fields from request body
     const {
@@ -69,7 +64,7 @@ console.log(uploadResult,'====uploadresult')
       fooditems,
       isActive,
       image: imageUrl|| null,
-      admin: new mongoose.Types.ObjectId(userId) // Correctly instantiate the ObjectId
+      admin: null // Correctly instantiate the ObjectId
     });
 
     await newhotel.save();
