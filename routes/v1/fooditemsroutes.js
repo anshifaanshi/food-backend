@@ -12,7 +12,7 @@ router.get('/allfood', getAllFoodItems);
 router.get('/foodbyid:id',upload.single("image"), getFoodItemById);
 
 
-router.post('/createfood', adminauth,createFoodItem);
+router.post('/createfood', createFoodItem);
 
 
 router.put('/update/:id' ,adminauth,updateFoodItem);
