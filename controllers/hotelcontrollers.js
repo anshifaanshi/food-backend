@@ -8,10 +8,9 @@ const FoodItem= require ('../models/fooditemsmodels')
 const createhotel = async (req, res) => {
   try {
     console.log("Create hotel route hit");
-    console.log(req.file ,'====== image in controller')
-    
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file); // 👈 important debug
 
-    // Destructure fields from request body
     const {
       name,
       address,
@@ -24,34 +23,66 @@ const createhotel = async (req, res) => {
       fooditems,
       isActive
     } = req.body;
-let imageUrl;
-    // Validate required fields
+
+    // ✅ Required validation
     if (!name || !phone || !email) {
-      return res.status(400).json({ message: 'Missing required fields: name, phone, and email are required.' });
+      return res.status(400).json({
+        message: "Missing required fields: name, phone, and email are required."
+      });
     }
 
+    // ✅ Address handling
     let addressData = {};
     if (address) {
       const { street, city, state, postalcode, country } = address;
 
       if (!city || !country) {
-        return res.status(400).json({ message: 'If provided, address must include city and country.' });
+        return res.status(400).json({
+          message: "If provided, address must include city and country."
+        });
       }
 
       addressData = { street, city, state, postalcode, country };
     }
 
+    // ✅ Check duplicate hotel
     const ishotelexist = await hotel.findOne({ name });
     if (ishotelexist) {
-      return res.status(400).json({ success: false, message: "Hotel already exists" });
+      return res.status(400).json({
+        success: false,
+        message: "Hotel already exists"
+      });
     }
-    if(req.file){
-const uploadResult=await cloudinaryInstane.uploader.upload(req.file.path)
-imageUrl=uploadResult.url;
-console.log(uploadResult,'====uploadresult')
-    }
-   
 
+    // ✅ IMAGE UPLOAD (Cloudinary)
+    let imageUrl = null;
+
+    if (req.file) {
+      try {
+        console.log("Uploading image to Cloudinary...");
+
+        const uploadResult = await cloudinaryInstane.uploader.upload(
+          req.file.path,
+          {
+            folder: "hotels" // optional but recommended
+          }
+        );
+
+        console.log("Cloudinary result:", uploadResult);
+
+        imageUrl = uploadResult.secure_url;
+      } catch (uploadError) {
+        console.error("Cloudinary upload error:", uploadError);
+
+        return res.status(500).json({
+          success: false,
+          message: "Image upload failed",
+          error: uploadError.message
+        });
+      }
+    }
+
+    // ✅ Create hotel
     const newhotel = new hotel({
       name,
       address: addressData,
@@ -60,19 +91,29 @@ console.log(uploadResult,'====uploadresult')
       website,
       rating,
       cuisineType,
-      openingHours: openingHours ? { open: openingHours.open, close: openingHours.close } : null,
+      openingHours: openingHours
+        ? { open: openingHours.open, close: openingHours.close }
+        : null,
       fooditems,
       isActive,
-      image: imageUrl|| null,
-      admin: null // Correctly instantiate the ObjectId
+      image: imageUrl || null,
+      admin: null
     });
 
     await newhotel.save();
-    return res.status(201).json({ success: true, message: "Hotel created successfully", hotel: newhotel });
+
+    return res.status(201).json({
+      success: true,
+      message: "Hotel created successfully",
+      hotel: newhotel
+    });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "An error occurred while creating the hotel." });
+    console.error("FULL ERROR:", error); // 👈 IMPORTANT DEBUG
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 
